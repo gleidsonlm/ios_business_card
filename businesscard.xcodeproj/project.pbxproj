@@ -16,12 +16,12 @@
 
 /* Begin PBXFileReference section */
 		8041D78A2E05FBBD00F38D07 /* businesscard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = businesscard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = businesscardApp.swift; sourceTree = "<group>"; };
-		JULES001HWVFILEREF /* HelloWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldView.swift; path = Views/HelloWorldView.swift; sourceTree = "<group>"; };
-		JULES003HWVMFILEREF /* HelloWorldViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldViewModel.swift; path = ViewModels/HelloWorldViewModel.swift; sourceTree = "<group>"; };
-		8041D7912E05FBC000F38D07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		8041D7932E05FBC000F38D07 /* businesscard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = businesscard.entitlements; sourceTree = "<group>"; };
-		8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = businesscard/businesscardApp.swift; sourceTree = SOURCE_ROOT; };
+		JULES001HWVFILEREF /* HelloWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldView.swift; path = businesscard/Views/HelloWorldView.swift; sourceTree = SOURCE_ROOT; };
+		JULES003HWVMFILEREF /* HelloWorldViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldViewModel.swift; path = businesscard/ViewModels/HelloWorldViewModel.swift; sourceTree = SOURCE_ROOT; };
+		8041D7912E05FBC000F38D07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = businesscard/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		8041D7932E05FBC000F38D07 /* businesscard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = businesscard/businesscard.entitlements; sourceTree = SOURCE_ROOT; };
+		8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = businesscard/Preview\ Content/Preview\ Assets.xcassets; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +61,6 @@
 				8041D7932E05FBC000F38D07 /* businesscard.entitlements */,
 				8041D7942E05FBC000F38D07 /* Preview Content */,
 			);
-			path = businesscard;
 			sourceTree = "<group>";
 		};
 		JULES005VIEWSGROUP /* Views */ = {
