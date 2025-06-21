@@ -1,0 +1,40 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build for iOS Simulator
+    runs-on: macos-latest # Using the latest available macOS runner
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Select latest Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 'latest-stable' # You can specify a version like '14.3.1'
+
+    - name: Build for Simulator
+      run: |
+        xcodebuild build \
+          -project businesscard.xcodeproj \
+          -scheme businesscard \
+          -sdk iphonesimulator \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+          CLEAN_BUILD=YES
+
+    # Optional: Upload .app bundle as an artifact
+    # This .app bundle is for simulator use only.
+    - name: Upload .app bundle
+      if: success() # Run this step only if build succeeds
+      uses: actions/upload-artifact@v4
+      with:
+        name: businesscard-simulator-app
+        path: ~/Library/Developer/Xcode/DerivedData/**/Build/Products/Debug-iphonesimulator/*.app
+        retention-days: 7 # Keep artifacts for 7 days
