@@ -20,13 +20,19 @@ jobs:
       with:
         xcode-version: 'latest-stable' # You can specify a version like '14.3.1'
 
+    - name: List available iOS simulators
+      run: xcrun simctl list devices
+
     - name: Build for Simulator
       run: |
         xcodebuild build \
           -project businesscard.xcodeproj \
           -scheme businesscard \
           -sdk iphonesimulator \
-          -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
+          -destination 'platform=iOS Simulator,name=iPhone SE (3rd generation),OS=15.0' \
+          ONLY_ACTIVE_ARCH=YES \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
           CLEAN_BUILD=YES
 
     # Optional: Upload .app bundle as an artifact
