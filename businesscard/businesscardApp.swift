@@ -11,7 +11,7 @@ import SwiftUI
 struct businesscardApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HelloWorldView(viewModel: HelloWorldViewModel())
         }
     }
 }

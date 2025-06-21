@@ -7,19 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8041D78E2E05FBBD00F38D07 /* businesscardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */; };
-		8041D7902E05FBBD00F38D07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8041D78F2E05FBBD00F38D07 /* ContentView.swift */; };
-		8041D7922E05FBC000F38D07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8041D7912E05FBC000F38D07 /* Assets.xcassets */; };
-		8041D7962E05FBC000F38D07 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */; };
+		808482242E070E5D00572B6F /* ios_business_card in Resources */ = {isa = PBXBuildFile; fileRef = 808482232E070E5C00572B6F /* ios_business_card */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		8041D78A2E05FBBD00F38D07 /* businesscard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = businesscard.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = businesscardApp.swift; sourceTree = "<group>"; };
-		8041D78F2E05FBBD00F38D07 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		8041D7912E05FBC000F38D07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		8041D7932E05FBC000F38D07 /* businesscard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = businesscard.entitlements; sourceTree = "<group>"; };
-		8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		808482232E070E5C00572B6F /* ios_business_card */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ios_business_card; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,7 +29,7 @@
 		8041D7812E05FBBD00F38D07 = {
 			isa = PBXGroup;
 			children = (
-				8041D78C2E05FBBD00F38D07 /* businesscard */,
+				808482232E070E5C00572B6F /* ios_business_card */,
 				8041D78B2E05FBBD00F38D07 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -47,26 +40,6 @@
 				8041D78A2E05FBBD00F38D07 /* businesscard.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		8041D78C2E05FBBD00F38D07 /* businesscard */ = {
-			isa = PBXGroup;
-			children = (
-				8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */,
-				8041D78F2E05FBBD00F38D07 /* ContentView.swift */,
-				8041D7912E05FBC000F38D07 /* Assets.xcassets */,
-				8041D7932E05FBC000F38D07 /* businesscard.entitlements */,
-				8041D7942E05FBC000F38D07 /* Preview Content */,
-			);
-			path = businesscard;
-			sourceTree = "<group>";
-		};
-		8041D7942E05FBC000F38D07 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -127,8 +100,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8041D7962E05FBC000F38D07 /* Preview Assets.xcassets in Resources */,
-				8041D7922E05FBC000F38D07 /* Assets.xcassets in Resources */,
+				808482242E070E5D00572B6F /* ios_business_card in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,8 +111,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8041D7902E05FBBD00F38D07 /* ContentView.swift in Sources */,
-				8041D78E2E05FBBD00F38D07 /* businesscardApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,6 +239,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -279,10 +250,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 12.7;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gleidsonlm.businesscard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -307,6 +278,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -317,10 +289,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 12.7;
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gleidsonlm.businesscard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
