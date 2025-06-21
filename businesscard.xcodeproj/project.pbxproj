@@ -8,7 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		8041D78E2E05FBBD00F38D07 /* businesscardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */; };
-		8041D7902E05FBBD00F38D07 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8041D78F2E05FBBD00F38D07 /* ContentView.swift */; };
+		JULES002HWVBUILDFILE /* HelloWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JULES001HWVFILEREF /* HelloWorldView.swift */; };
+		JULES004HWVMBUILDFILE /* HelloWorldViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = JULES003HWVMFILEREF /* HelloWorldViewModel.swift */; };
 		8041D7922E05FBC000F38D07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8041D7912E05FBC000F38D07 /* Assets.xcassets */; };
 		8041D7962E05FBC000F38D07 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -16,7 +17,8 @@
 /* Begin PBXFileReference section */
 		8041D78A2E05FBBD00F38D07 /* businesscard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = businesscard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = businesscardApp.swift; sourceTree = "<group>"; };
-		8041D78F2E05FBBD00F38D07 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		JULES001HWVFILEREF /* HelloWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldView.swift; path = businesscard/Views/HelloWorldView.swift; sourceTree = "<group>"; };
+		JULES003HWVMFILEREF /* HelloWorldViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HelloWorldViewModel.swift; path = businesscard/ViewModels/HelloWorldViewModel.swift; sourceTree = "<group>"; };
 		8041D7912E05FBC000F38D07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8041D7932E05FBC000F38D07 /* businesscard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = businesscard.entitlements; sourceTree = "<group>"; };
 		8041D7952E05FBC000F38D07 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -53,12 +55,31 @@
 			isa = PBXGroup;
 			children = (
 				8041D78D2E05FBBD00F38D07 /* businesscardApp.swift */,
-				8041D78F2E05FBBD00F38D07 /* ContentView.swift */,
+				JULES005VIEWSGROUP /* Views */,
+				JULES006VMODGROUP /* ViewModels */,
 				8041D7912E05FBC000F38D07 /* Assets.xcassets */,
 				8041D7932E05FBC000F38D07 /* businesscard.entitlements */,
 				8041D7942E05FBC000F38D07 /* Preview Content */,
 			);
 			path = businesscard;
+			sourceTree = "<group>";
+		};
+		JULES005VIEWSGROUP /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				JULES001HWVFILEREF /* HelloWorldView.swift */,
+			);
+			path = businesscard/Views;
+			name = Views;
+			sourceTree = "<group>";
+		};
+		JULES006VMODGROUP /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				JULES003HWVMFILEREF /* HelloWorldViewModel.swift */,
+			);
+			path = businesscard/ViewModels;
+			name = ViewModels;
 			sourceTree = "<group>";
 		};
 		8041D7942E05FBC000F38D07 /* Preview Content */ = {
@@ -139,8 +160,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8041D7902E05FBBD00F38D07 /* ContentView.swift in Sources */,
 				8041D78E2E05FBBD00F38D07 /* businesscardApp.swift in Sources */,
+				JULES002HWVBUILDFILE /* HelloWorldView.swift in Sources */,
+				JULES004HWVMBUILDFILE /* HelloWorldViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
