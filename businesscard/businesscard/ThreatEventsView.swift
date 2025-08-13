@@ -12,6 +12,7 @@ import SwiftData
 struct ThreatEventsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var threatEvents: [ThreatEvent]
+    @State private var listener: ThreatEventListener?
     
     var body: some View {
         NavigationView {
@@ -29,26 +30,16 @@ struct ThreatEventsView: View {
             }
             .navigationTitle("Threat Events")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Add Sample", action: addSampleEvents)
-                }
+            .onAppear {
+                setupThreatEventListener()
             }
         }
     }
     
-    /// Adds sample threat events for demonstration
-    private func addSampleEvents() {
-        withAnimation {
-            let events = [
-                ThreatEvent.debuggerThreatDetected(),
-                ThreatEvent.debuggableEntitlement(),
-                ThreatEvent.appIntegrityError()
-            ]
-            
-            for event in events {
-                modelContext.insert(event)
-            }
+    /// Sets up the threat event listener when the view appears
+    private func setupThreatEventListener() {
+        if listener == nil {
+            listener = ThreatEventListener(modelContext: modelContext)
         }
     }
 }
@@ -206,7 +197,7 @@ struct EmptyStateView: View {
                 .fontWeight(.medium)
                 .foregroundColor(.primary)
             
-            Text("Appdome threat detection is active.\nTap 'Add Sample' to see example events.")
+            Text("Appdome threat detection is active and monitoring for security threats.\nEvents will appear here when detected.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

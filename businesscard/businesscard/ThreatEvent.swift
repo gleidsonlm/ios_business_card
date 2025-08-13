@@ -60,38 +60,65 @@ final class ThreatEvent {
     }
 }
 
-// MARK: - Threat Event Factory
+// MARK: - Real Event Creation from Appdome Notifications
 extension ThreatEvent {
-    /// Creates a DebuggerThreatDetected event
-    static func debuggerThreatDetected() -> ThreatEvent {
+    /// Creates a ThreatEvent from Appdome notification userInfo
+    static func fromNotification(type: String, userInfo: [AnyHashable: Any]) -> ThreatEvent {
+        let message = userInfo["message"] as? String ?? "Threat detected"
+        let reasonData = userInfo["reasonData"]
+        let reasonCode = userInfo["reasonCode"]
+        let currentThreatEventScore = userInfo["currentThreatEventScore"]
+        let threatEventsScore = userInfo["threatEventsScore"]
+        
+        var title: String
+        var description: String
+        var severity: String
+        var metadata: String = ""
+        
+        // Build metadata from available information
+        var metadataComponents: [String] = []
+        if let reasonCode = reasonCode {
+            metadataComponents.append("Reason Code: \(reasonCode)")
+        }
+        if let reasonData = reasonData {
+            metadataComponents.append("Reason Data: \(reasonData)")
+        }
+        if let currentScore = currentThreatEventScore {
+            metadataComponents.append("Current Threat Score: \(currentScore)")
+        }
+        if let totalScore = threatEventsScore {
+            metadataComponents.append("Total Threat Score: \(totalScore)")
+        }
+        metadata = metadataComponents.joined(separator: ", ")
+        
+        switch type {
+        case "DebuggerThreatDetected":
+            title = "Debugger Detected"
+            description = message.isEmpty ? "A debugging tool has been detected attempting to attach to the application." : message
+            severity = "High"
+            
+        case "DebuggableEntitlement":
+            title = "Debug Entitlement Detected"
+            description = message.isEmpty ? "The application has debug entitlements enabled, making it vulnerable to debugging attacks." : message
+            severity = "Medium"
+            
+        case "AppIntegrityError":
+            title = "App Integrity Violation"
+            description = message.isEmpty ? "The application's integrity has been compromised." : message
+            severity = "Critical"
+            
+        default:
+            title = "Unknown Threat"
+            description = message.isEmpty ? "An unknown threat has been detected." : message
+            severity = "Medium"
+        }
+        
         return ThreatEvent(
-            threatType: "DebuggerThreatDetected",
-            title: "Debugger Detected",
-            description: "A debugging tool has been detected attempting to attach to the application. This could indicate reverse engineering or malicious analysis attempts.",
-            severity: "High",
-            metadata: "Detection method: Runtime analysis, Process monitoring"
-        )
-    }
-    
-    /// Creates a DebuggableEntitlement event
-    static func debuggableEntitlement() -> ThreatEvent {
-        return ThreatEvent(
-            threatType: "DebuggableEntitlement",
-            title: "Debug Entitlement Detected",
-            description: "The application has debug entitlements enabled, making it vulnerable to debugging and reverse engineering attacks.",
-            severity: "Medium",
-            metadata: "Entitlement: get-task-allow, com.apple.private.security.no-container"
-        )
-    }
-    
-    /// Creates an AppIntegrityError event
-    static func appIntegrityError() -> ThreatEvent {
-        return ThreatEvent(
-            threatType: "AppIntegrityError",
-            title: "App Integrity Violation",
-            description: "The application's integrity has been compromised. This could indicate tampering, modification, or injection of malicious code.",
-            severity: "Critical",
-            metadata: "Integrity check: Binary signature verification, Code signing validation"
+            threatType: type,
+            title: title,
+            description: description,
+            severity: severity,
+            metadata: metadata.isEmpty ? nil : metadata
         )
     }
 }
