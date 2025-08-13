@@ -30,6 +30,33 @@ final class businesscardUITests: XCTestCase {
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+    
+    @MainActor
+    func testThreatEventsButtonExists() throws {
+        // Test that the threat events button is present in the toolbar
+        let app = XCUIApplication()
+        app.launch()
+        
+        // Look for the threat events button (warning icon)
+        let threatEventsButton = app.buttons["Threat Events"]
+        XCTAssertTrue(threatEventsButton.exists, "Threat Events button should be present in the toolbar")
+    }
+    
+    @MainActor
+    func testThreatEventsNavigation() throws {
+        // Test navigation to threat events screen
+        let app = XCUIApplication()
+        app.launch()
+        
+        // Tap the threat events button
+        let threatEventsButton = app.buttons["Threat Events"]
+        if threatEventsButton.exists {
+            threatEventsButton.tap()
+            
+            // Verify the threat events screen appears
+            XCTAssertTrue(app.navigationBars["Threat Events"].exists, "Threat Events screen should be displayed")
+        }
+    }
 
     @MainActor
     func testLaunchPerformance() throws {
