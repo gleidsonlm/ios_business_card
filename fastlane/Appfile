@@ -9,7 +9,7 @@ app_identifier(ENV["APP_IDENTIFIER"] || "com.example.businesscard")
 team_id(ENV["TEAM_ID"])
 
 # Your App Store Connect team ID (if different from Developer Portal team)
-itunes_connect_team_id(ENV["ITUNES_CONNECT_TEAM_ID"])
+itc_team_id(ENV["ITUNES_CONNECT_TEAM_ID"])
 
 # App Store Connect API key configuration
 # This is the recommended authentication method for CI/CD

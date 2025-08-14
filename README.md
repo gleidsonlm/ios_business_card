@@ -113,7 +113,10 @@ This project includes automated deployment to TestFlight using Fastlane. See `fa
    - Automated release notes generation
    - Error handling with rollback capabilities
 
-For complete deployment documentation, troubleshooting, and CI/CD integration, see [`fastlane/README.md`](fastlane/README.md).
+For complete deployment documentation, troubleshooting, and CI/CD integration, see:
+- [`fastlane/README.md`](fastlane/README.md) - Detailed setup and usage guide
+- [`DEPLOYMENT_SUMMARY.md`](DEPLOYMENT_SUMMARY.md) - Complete implementation overview
+- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) - Common issues and solutions
 
 ## Compliance
 
