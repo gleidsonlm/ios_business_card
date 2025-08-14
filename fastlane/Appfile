@@ -1,0 +1,23 @@
+# The Appfile is used to store app identifiers and Apple ID information
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile
+
+# Your app's bundle identifier
+app_identifier(ENV["APP_IDENTIFIER"] || "com.example.businesscard")
+
+# Your Apple Developer Portal team ID (if you're in multiple teams)
+team_id(ENV["TEAM_ID"])
+
+# Your App Store Connect team ID (if different from Developer Portal team)
+itunes_connect_team_id(ENV["ITUNES_CONNECT_TEAM_ID"])
+
+# App Store Connect API key configuration
+# This is the recommended authentication method for CI/CD
+if ENV["APP_STORE_CONNECT_API_KEY_ID"]
+  app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+    key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+    is_key_content_base64: true
+  )
+end

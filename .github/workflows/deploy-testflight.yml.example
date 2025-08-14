@@ -1,0 +1,163 @@
+# Example GitHub Actions workflow for TestFlight deployment
+# This workflow demonstrates how to integrate Fastlane TestFlight deployment
+# into your CI/CD pipeline after Appdome protection is applied
+
+name: Deploy to TestFlight
+
+on:
+  # Trigger on push to main branch (adjust as needed)
+  push:
+    branches: [ main ]
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      ipa_path:
+        description: 'Path to protected IPA file'
+        required: true
+        default: './protected-businesscard.ipa'
+      release_notes:
+        description: 'Custom release notes'
+        required: false
+        default: ''
+      test_groups:
+        description: 'TestFlight groups (comma-separated)'
+        required: false
+        default: 'Internal Testers'
+
+env:
+  # Disable Fastlane automatic updates and prompts for CI
+  FASTLANE_SKIP_UPDATE_CHECK: true
+  FASTLANE_HIDE_GITHUB_ISSUES: true
+  FASTLANE_DISABLE_COLORS: true
+
+jobs:
+  deploy-testflight:
+    name: Deploy to TestFlight
+    runs-on: macos-14  # Use macOS runner for iOS builds
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for git operations
+        fetch-depth: 0
+    
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true  # runs 'bundle install' and caches gems
+    
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '15.0'  # Adjust to your required version
+    
+    - name: Cache Fastlane dependencies
+      uses: actions/cache@v3
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-gems-
+    
+    # NOTE: This step assumes you have a previous workflow step that:
+    # 1. Builds and archives the app
+    # 2. Applies Appdome protection
+    # 3. Outputs a protected IPA file
+    - name: Download protected IPA
+      # This is a placeholder - replace with your actual IPA retrieval method
+      # Examples:
+      # - Download from artifacts of a previous job
+      # - Download from Appdome API
+      # - Use output from previous workflow steps
+      run: |
+        echo "📥 This step should download/retrieve your protected IPA"
+        echo "The IPA should be available at: ${{ github.event.inputs.ipa_path || './protected-businesscard.ipa' }}"
+        
+        # Example: Download from artifacts (if using upload-artifact in previous job)
+        # - uses: actions/download-artifact@v3
+        #   with:
+        #     name: protected-ipa
+        #     path: ./
+    
+    - name: Validate Fastlane setup
+      run: |
+        echo "🔍 Validating Fastlane configuration..."
+        bundle exec fastlane validate_testflight_setup
+    
+    - name: Deploy to TestFlight
+      env:
+        # App Store Connect API Key configuration
+        APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        
+        # App configuration
+        APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
+        TEAM_ID: ${{ secrets.TEAM_ID }}
+        ITUNES_CONNECT_TEAM_ID: ${{ secrets.ITUNES_CONNECT_TEAM_ID }}
+        
+        # Skip git checks for CI environment
+        SKIP_GIT_CHECK: true
+      run: |
+        echo "🚀 Deploying to TestFlight..."
+        
+        # Build Fastlane command with parameters
+        IPA_PATH="${{ github.event.inputs.ipa_path || './protected-businesscard.ipa' }}"
+        RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
+        TEST_GROUPS="${{ github.event.inputs.test_groups }}"
+        
+        # Base command
+        CMD="bundle exec fastlane deploy_to_testflight ipa_path:\"$IPA_PATH\""
+        
+        # Add optional parameters if provided
+        if [ -n "$RELEASE_NOTES" ]; then
+          CMD="$CMD release_notes:\"$RELEASE_NOTES\""
+        fi
+        
+        if [ -n "$TEST_GROUPS" ]; then
+          CMD="$CMD groups:\"$TEST_GROUPS\""
+        fi
+        
+        # Execute deployment
+        eval $CMD
+    
+    - name: Create deployment summary
+      if: always()
+      run: |
+        echo "## 📱 TestFlight Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ $? -eq 0 ]; then
+          echo "✅ **Status:** Deployment successful" >> $GITHUB_STEP_SUMMARY
+          echo "📱 **Build:** Will be available on TestFlight after processing" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Status:** Deployment failed" >> $GITHUB_STEP_SUMMARY
+          echo "🔍 **Action:** Check logs for error details" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**IPA Path:** ${{ github.event.inputs.ipa_path || './protected-businesscard.ipa' }}"
+        echo "**Test Groups:** ${{ github.event.inputs.test_groups || 'Default' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+    
+    - name: Upload Fastlane logs
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: fastlane-logs
+        path: |
+          fastlane/report.xml
+          fastlane/test_output/
+        retention-days: 7
+
+# Required GitHub Secrets:
+# 
+# APP_STORE_CONNECT_API_KEY_ID      - Your App Store Connect API key ID
+# APP_STORE_CONNECT_ISSUER_ID       - Your App Store Connect issuer ID  
+# APP_STORE_CONNECT_API_KEY_CONTENT - Base64 encoded .p8 file content
+# APP_IDENTIFIER                    - Your app's bundle identifier
+# TEAM_ID                           - Your Apple Developer team ID
+# ITUNES_CONNECT_TEAM_ID            - Your iTunes Connect team ID (if different)

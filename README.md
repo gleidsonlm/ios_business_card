@@ -84,6 +84,37 @@ See `BUILD.md` for detailed build instructions.
 
 The app includes both unit tests and UI tests. Run tests from Xcode or use the command line as documented in `BUILD.md`.
 
+### Deployment
+
+This project includes automated deployment to TestFlight using Fastlane. See `fastlane/README.md` for detailed deployment instructions.
+
+#### Quick Deployment
+
+1. **Setup Fastlane** (one-time setup):
+   ```bash
+   # Install dependencies
+   bundle install
+   
+   # Configure environment variables
+   cp .env.example .env
+   # Edit .env with your App Store Connect credentials
+   ```
+
+2. **Deploy to TestFlight**:
+   ```bash
+   # Deploy a protected IPA from Appdome
+   fastlane deploy_to_testflight ipa_path:"/path/to/protected/businesscard.ipa"
+   ```
+
+3. **Deployment Features**:
+   - Automatic build number increment
+   - Git tagging of releases
+   - TestFlight group management
+   - Automated release notes generation
+   - Error handling with rollback capabilities
+
+For complete deployment documentation, troubleshooting, and CI/CD integration, see [`fastlane/README.md`](fastlane/README.md).
+
 ## Compliance
 
 - **App Store Ready**: Includes required Privacy Manifest file

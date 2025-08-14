@@ -60,6 +60,19 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Environment variables (contains sensitive data)
+.env
+fastlane/.env
+
+# Fastlane additional generated files
+fastlane/README.md.orig
+
+# Build artifacts and archives
 build
 .DS_Store
 exportOptions.plist
+
+# Temporary files
+*.tmp
+*.log

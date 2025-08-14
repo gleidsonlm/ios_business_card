@@ -1,0 +1,260 @@
+# Fastfile for iOS Business Card App
+# For more information about the Fastfile, see:
+#     https://docs.fastlane.tools/actions/
+
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+
+default_platform(:ios)
+
+platform :ios do
+  
+  ################################################################################
+  # ENVIRONMENT SETUP
+  ################################################################################
+  
+  before_all do
+    # Ensure we're in the right directory
+    ensure_git_status_clean unless ENV["SKIP_GIT_CHECK"] == "true"
+    
+    # Print current configuration
+    UI.header "🚀 Starting Fastlane for iOS Business Card App"
+    UI.message "App Identifier: #{CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)}"
+    UI.message "Team ID: #{CredentialsManager::AppfileConfig.try_fetch_value(:team_id)}"
+  end
+
+  ################################################################################
+  # HELPER LANES
+  ################################################################################
+
+  desc "Increment build number and commit changes"
+  lane :increment_build do |options|
+    # Get current build number
+    current_build = get_build_number(xcodeproj: "businesscard/businesscard.xcodeproj")
+    UI.message "Current build number: #{current_build}"
+    
+    # Increment build number
+    new_build = increment_build_number(
+      xcodeproj: "businesscard/businesscard.xcodeproj",
+      build_number: options[:build_number] || (current_build.to_i + 1).to_s
+    )
+    
+    UI.success "Build number incremented to: #{new_build}"
+    
+    # Commit the changes
+    git_add(path: "businesscard/businesscard.xcodeproj/project.pbxproj")
+    git_commit(
+      path: "businesscard/businesscard.xcodeproj/project.pbxproj",
+      message: "Bump build number to #{new_build} [skip ci]"
+    )
+    
+    new_build
+  end
+
+  desc "Create git tag for release"
+  lane :create_release_tag do |options|
+    version_number = get_version_number(xcodeproj: "businesscard/businesscard.xcodeproj")
+    build_number = options[:build_number] || get_build_number(xcodeproj: "businesscard/businesscard.xcodeproj")
+    
+    tag_name = "v#{version_number}-build#{build_number}"
+    
+    add_git_tag(
+      tag: tag_name,
+      message: "Release #{tag_name} - TestFlight deployment"
+    )
+    
+    push_git_tags
+    
+    UI.success "Created and pushed git tag: #{tag_name}"
+    tag_name
+  end
+
+  ################################################################################
+  # DEPLOYMENT LANES
+  ################################################################################
+
+  desc "Deploy to TestFlight"
+  desc "This lane uploads a protected IPA from Appdome to TestFlight"
+  desc "Options:"
+  desc "  ipa_path: Path to the protected IPA file (required)"
+  desc "  release_notes: Custom release notes (optional)"
+  desc "  groups: TestFlight groups to distribute to (optional, comma-separated)"
+  desc "  skip_waiting_for_build_processing: Skip waiting for build processing (default: false)"
+  desc "  increment_build: Increment build number before upload (default: true)"
+  lane :deploy_to_testflight do |options|
+    begin
+      UI.header "🚀 Deploying to TestFlight"
+      
+      # Validate required parameters
+      ipa_path = options[:ipa_path]
+      unless ipa_path && File.exist?(ipa_path)
+        UI.user_error! "❌ IPA file not found at path: #{ipa_path}. Please provide a valid ipa_path parameter."
+      end
+      
+      UI.message "📱 Using IPA: #{ipa_path}"
+      
+      # Increment build number if requested (default: true)
+      new_build_number = nil
+      if options.fetch(:increment_build, true)
+        UI.header "📈 Incrementing Build Number"
+        new_build_number = increment_build
+      end
+      
+      # Prepare release notes
+      release_notes = options[:release_notes] || generate_default_release_notes
+      UI.message "📝 Release notes: #{release_notes}"
+      
+      # Parse groups if provided
+      groups = options[:groups] ? options[:groups].split(',').map(&:strip) : nil
+      if groups
+        UI.message "👥 Distributing to groups: #{groups.join(', ')}"
+      end
+      
+      # Upload to TestFlight using pilot
+      UI.header "☁️ Uploading to TestFlight"
+      pilot(
+        ipa: ipa_path,
+        changelog: release_notes,
+        groups: groups,
+        skip_waiting_for_build_processing: options.fetch(:skip_waiting_for_build_processing, false),
+        skip_submission: false,
+        distribute_external: false,
+        notify_external_testers: groups ? true : false
+      )
+      
+      # Create git tag for successful deployment
+      if new_build_number
+        UI.header "🏷️ Creating Release Tag"
+        tag_name = create_release_tag(build_number: new_build_number)
+      end
+      
+      # Success notification
+      UI.success "✅ Successfully deployed to TestFlight!"
+      UI.success "📱 Build will be available for testing once processing is complete"
+      if tag_name
+        UI.success "🏷️ Created git tag: #{tag_name}"
+      end
+      
+      # Return deployment info
+      {
+        success: true,
+        ipa_path: ipa_path,
+        build_number: new_build_number,
+        tag_name: tag_name,
+        release_notes: release_notes
+      }
+      
+    rescue => exception
+      UI.error "❌ Deployment failed: #{exception.message}"
+      
+      # Rollback build number increment if it was performed
+      if new_build_number && options.fetch(:increment_build, true)
+        UI.header "🔄 Rolling back build number increment"
+        rollback_build_increment
+      end
+      
+      # Re-raise the exception to fail the lane
+      raise exception
+    end
+  end
+
+  ################################################################################
+  # UTILITY LANES
+  ################################################################################
+
+  desc "Validate TestFlight deployment prerequisites"
+  lane :validate_testflight_setup do
+    UI.header "🔍 Validating TestFlight Setup"
+    
+    # Check App Store Connect API configuration
+    unless ENV["APP_STORE_CONNECT_API_KEY_ID"]
+      UI.error "❌ APP_STORE_CONNECT_API_KEY_ID environment variable not set"
+    end
+    
+    unless ENV["APP_STORE_CONNECT_ISSUER_ID"]
+      UI.error "❌ APP_STORE_CONNECT_ISSUER_ID environment variable not set"
+    end
+    
+    unless ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+      UI.error "❌ APP_STORE_CONNECT_API_KEY_CONTENT environment variable not set"
+    end
+    
+    # Check app identifier
+    app_id = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+    unless app_id
+      UI.error "❌ App identifier not configured in Appfile"
+    end
+    
+    # Check team ID
+    team_id = CredentialsManager::AppfileConfig.try_fetch_value(:team_id)
+    unless team_id
+      UI.error "❌ Team ID not configured in Appfile"
+    end
+    
+    UI.success "✅ TestFlight setup validation complete"
+  end
+
+  desc "Test deployment with a sample IPA path (dry run)"
+  lane :test_deployment do |options|
+    UI.header "🧪 Testing Deployment Configuration"
+    
+    # Validate setup first
+    validate_testflight_setup
+    
+    # Test with sample path
+    test_ipa_path = options[:ipa_path] || "/path/to/protected/businesscard.ipa"
+    
+    UI.message "This would deploy IPA from: #{test_ipa_path}"
+    UI.message "Release notes would be: #{generate_default_release_notes}"
+    
+    UI.success "✅ Deployment configuration test complete"
+    UI.message "Run: fastlane deploy_to_testflight ipa_path:/actual/path/to/your.ipa"
+  end
+
+  ################################################################################
+  # PRIVATE HELPER METHODS
+  ################################################################################
+
+  private_lane :generate_default_release_notes do
+    version_number = get_version_number(xcodeproj: "businesscard/businesscard.xcodeproj")
+    build_number = get_build_number(xcodeproj: "businesscard/businesscard.xcodeproj")
+    
+    notes = "iOS Business Card App v#{version_number} (Build #{build_number})\n\n"
+    notes += "🛡️ This build includes Appdome security protection\n"
+    notes += "📱 Features: Business card management, threat event monitoring\n"
+    notes += "🔒 Security: Enhanced protection against threats\n\n"
+    notes += "Built on #{Time.now.strftime('%Y-%m-%d at %H:%M UTC')}"
+    
+    notes
+  end
+
+  private_lane :rollback_build_increment do
+    begin
+      UI.message "🔄 Attempting to rollback build number increment..."
+      
+      # Reset the project file to the previous commit
+      sh("git checkout HEAD~1 -- businesscard/businesscard.xcodeproj/project.pbxproj")
+      
+      UI.success "✅ Build number rollback complete"
+    rescue => exception
+      UI.error "❌ Failed to rollback build number: #{exception.message}"
+      UI.message "Please manually revert the build number in Xcode"
+    end
+  end
+
+  ################################################################################
+  # ERROR HANDLING
+  ################################################################################
+
+  error do |lane, exception|
+    UI.error "❌ Lane #{lane} failed with error: #{exception.message}"
+    
+    # Add any additional error handling here
+    # For example, you could send notifications to Slack, email, etc.
+  end
+
+  after_all do |lane|
+    UI.success "✅ Lane #{lane} completed successfully"
+  end
+
+end
