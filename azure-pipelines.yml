@@ -17,11 +17,19 @@ steps:
         xcrun xcode-select --print-path
 
 - task: Xcode@5
+  displayName: 'Archive and Export Unsigned IPA'
   inputs:
     actions: 'build'
     configuration: 'Release'
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: true
-    exportOptions: 'plist'
-    exportOptionsPlist: 'exportOptions.plist'
+    exportMethod: 'development'
+    args: 'CODE_SIGNING_ALLOWED=NO'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Unsigned IPA'
+  inputs:
+    pathToPublish: '$(Build.SourcesDirectory)/output'
+    artifactName: 'unsigned-ipa'
+  condition: succeededOrFailed()
