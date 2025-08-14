@@ -15,36 +15,16 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-        echo "Mac OS version:"
-        sw_vers -productVersion
-
-        echo "Installed Xcode versions:"
-        ls /Applications | grep 'Xcode'
-
-        echo "Currently selected Xcode:"
-        xcrun xcode-select --print-path
-
-        echo "Finding the latest Xcode version..."
         latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
-
-        echo "Latest Xcode version is: $latest_xcode"
-
-        echo "Selecting the latest Xcode version..."
         sudo xcode-select -s "/Applications/$latest_xcode"
-
-        echo "Currently selected Xcode:"
         xcrun xcode-select --print-path
 
-        echo "Xcode version details:"
-        xcodebuild -version
 - task: Xcode@5
   inputs:
     actions: 'build'
-    scheme: 'businesscard'
-    sdk: 'iphoneos'
     configuration: 'Release'
-    xcWorkspacePath: '**/*.xcodeproj/project.xcworkspace'
-    xcodeVersion: 'default'
-    xcodeDeveloperDir: "$latest_xcode_path"
+    sdk: 'iphoneos'
+    scheme: 'businesscard'
     packageApp: true
-    exportMethod: 'ad-hoc'
+    exportOptions: 'plist'
+    exportOptionsPlist: 'exportOptions.plist'
