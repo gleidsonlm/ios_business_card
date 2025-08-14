@@ -10,17 +10,33 @@ pool:
   vmImage: 'macos-latest'
 
 steps:
-
 - task: Bash@3
   displayName: "Select Latest Xcode Version"
   inputs:
     targetType: 'inline'
     script: |
-      latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
-      sudo xcode-select -s "/Applications/$latest_xcode"
-      latest_xcode_path=$(xcrun xcode-select --print-path)
-      xcodebuild -version
+        echo "Mac OS version:"
+        sw_vers -productVersion
 
+        echo "Installed Xcode versions:"
+        ls /Applications | grep 'Xcode'
+
+        echo "Currently selected Xcode:"
+        xcrun xcode-select --print-path
+
+        echo "Finding the latest Xcode version..."
+        latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
+
+        echo "Latest Xcode version is: $latest_xcode"
+
+        echo "Selecting the latest Xcode version..."
+        sudo xcode-select -s "/Applications/$latest_xcode"
+
+        echo "Currently selected Xcode:"
+        xcrun xcode-select --print-path
+
+        echo "Xcode version details:"
+        xcodebuild -version
 - task: Xcode@5
   inputs:
     actions: 'build'
@@ -28,7 +44,7 @@ steps:
     sdk: 'iphoneos'
     configuration: 'Release'
     xcWorkspacePath: '**/*.xcodeproj/project.xcworkspace'
-    xcodeVersion: 'specifyPath'
+    xcodeVersion: 'default'
     xcodeDeveloperDir: "$latest_xcode_path"
     packageApp: true
     exportMethod: 'ad-hoc'
