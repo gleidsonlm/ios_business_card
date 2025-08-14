@@ -1,0 +1,27 @@
+# Xcode
+# Build, test, and archive an Xcode workspace on macOS.
+# Add steps that install certificates, test, sign, and distribute an app, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/xcode
+
+pool:
+  vmImage: 'macos-latest'
+
+steps:
+- task: Bash@3
+  displayName: "Select Latest Xcode Version"
+  inputs:
+    targetType: 'inline'
+    script: |
+        latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
+        sudo xcode-select -s "/Applications/$latest_xcode"
+        xcrun xcode-select --print-path
+
+- task: Xcode@5
+  inputs:
+    actions: 'build'
+    configuration: 'Release'
+    sdk: 'iphoneos'
+    scheme: 'businesscard'
+    packageApp: true
+    exportOptions: 'plist'
+    exportOptionsPlist: 'exportOptions.plist'
