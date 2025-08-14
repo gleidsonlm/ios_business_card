@@ -6,8 +6,25 @@ An iOS application for managing business card information, built with SwiftUI an
 
 - Local data storage using SwiftData
 - List management for business card items
+- **Appdome Threat Events Screen**: View and monitor security threats detected by Appdome In-App Detection
 - Cross-platform support (iOS and macOS)
 - Sandbox security model
+
+### Threat Events Feature
+
+The app includes a comprehensive threat events monitoring system powered by Appdome security detection:
+
+- **Warning Button**: Easily accessible warning icon in the main toolbar
+- **Real-time Monitoring**: Displays threat events detected in In-App Detection mode
+- **Card-based Layout**: Each threat event is presented in a detailed card showing:
+  - Threat type and severity level
+  - Detection timestamp and mode
+  - Detailed description and metadata
+  - Active/resolved status indicator
+- **Supported Threat Types**:
+  - **DebuggerThreatDetected**: Alerts when debugging tools attempt to attach
+  - **DebuggableEntitlement**: Warns about debug entitlements that make the app vulnerable
+  - **AppIntegrityError**: Critical alerts for app tampering or integrity violations
 
 ## Privacy and Data Handling
 
@@ -75,6 +92,7 @@ The app includes both unit tests and UI tests. Run tests from Xcode or use the c
 
 ## Version History
 
+- **v1.2 (Build 3)**: Added Appdome Threat Events Screen with In-App Detection monitoring
 - **v1.1 (Build 2)**: Added Privacy Manifest file for App Store compliance
 - **v1.0 (Build 1)**: Initial release with basic list management
 

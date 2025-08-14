@@ -11,6 +11,7 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    @State private var showingThreatEvents = false
 
     var body: some View {
         NavigationSplitView {
@@ -33,6 +34,11 @@ struct ContentView: View {
                     EditButton()
                 }
 #endif
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingThreatEvents = true }) {
+                        Label("Threat Events", systemImage: "exclamationmark.triangle")
+                    }
+                }
                 ToolbarItem {
                     Button(action: addItem) {
                         Label("Add Item", systemImage: "plus")
@@ -41,6 +47,9 @@ struct ContentView: View {
             }
         } detail: {
             Text("Select an item")
+        }
+        .sheet(isPresented: $showingThreatEvents) {
+            ThreatEventsView()
         }
     }
 
@@ -62,5 +71,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: [Item.self, ThreatEvent.self], inMemory: true)
 }
