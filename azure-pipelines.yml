@@ -19,11 +19,11 @@ steps:
 - task: Xcode@5
   displayName: 'Build and Archive iOS App (Unsigned)'
   inputs:
-    actions: 'build archive'  # Remove export
+    actions: 'build archive'
     configuration: 'Release'
-    sdk: 'iphoneos' 
+    sdk: 'iphoneos'
     scheme: 'businesscard'
-    packageApp: false  # Critical: set to false
+    packageApp: true
     args: 'CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE=""'
 
 - task: PublishBuildArtifacts@1
