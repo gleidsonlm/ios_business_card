@@ -32,4 +32,3 @@ steps:
   inputs:
     pathToPublish: '$(Build.SourcesDirectory)/output'
     artifactName: 'unsigned-ipa'
-  condition: succeededOrFailed()
