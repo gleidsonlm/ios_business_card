@@ -23,14 +23,11 @@ steps:
     configuration: 'Release'
     sdk: 'iphoneos'
     scheme: 'businesscard'
-    packageApp: true
-    exportOptions: 'plist'
-    exportOptionsPlist: 'exportOptions.plist'
-    args: 'CODE_SIGNING_ALLOWED=NO'
+    packageApp: no
+    args: 'CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE=""'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Unsigned IPA'
   inputs:
     pathToPublish: '$(Build.SourcesDirectory)/output'
     artifactName: 'unsigned-ipa'
-  condition: succeededOrFailed()
