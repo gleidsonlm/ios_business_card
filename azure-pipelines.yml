@@ -19,7 +19,7 @@ steps:
 - task: Xcode@5
   displayName: 'Archive Unsigned IPA'
   inputs:
-    actions: 'archive'
+    actions: 'build archive'
     configuration: 'Release'
     sdk: 'iphoneos'
     scheme: 'businesscard'
