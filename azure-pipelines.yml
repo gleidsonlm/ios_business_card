@@ -24,7 +24,8 @@ steps:
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: true
-    args: 'CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE=""'
+    exportTeamId: '6N4F2PK5R3'
+    signingOption: nosign
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Unsigned IPA'
