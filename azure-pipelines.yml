@@ -17,17 +17,31 @@ steps:
         xcrun xcode-select --print-path
 
 - task: Xcode@5
-  displayName: 'Archive and Export Unsigned IPA'
+  displayName: 'Archive Unsigned IPA'
   inputs:
-    actions: 'build'
+    actions: 'archive'
     configuration: 'Release'
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: no
     args: 'CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE=""'
 
+- task: Bash@3
+  displayName: 'Extract Unsigned IPA'
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Extract .app from archive
+      cp -r "$(Build.SourcesDirectory)/businesscard.xcarchive/Products/Applications/businesscard.app" "$(Build.ArtifactStagingDirectory)/"
+      
+      # Create unsigned IPA manually
+      mkdir -p "$(Build.ArtifactStagingDirectory)/Payload"
+      cp -r "$(Build.SourcesDirectory)/businesscard.xcarchive/Products/Applications/businesscard.app" "$(Build.ArtifactStagingDirectory)/Payload/"
+      cd "$(Build.ArtifactStagingDirectory)"
+      zip -r businesscard-unsigned.ipa Payload/
+
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Unsigned IPA'
+  displayName: 'Arttifact Unsigned IPA'
   inputs:
     pathToPublish: '$(Build.SourcesDirectory)/output'
     artifactName: 'unsigned-ipa'
