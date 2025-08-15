@@ -8,7 +8,7 @@ pool:
 
 steps:
 - task: Bash@3
-  displayName: "Select Latest Xcode Version"
+  displayName: "Latest Xcode Version"
   inputs:
     targetType: 'inline'
     script: |
@@ -17,18 +17,20 @@ steps:
         xcrun xcode-select --print-path
 
 - task: Xcode@5
-  displayName: 'Build and Archive iOS App (Unsigned)'
+  displayName: 'Export iOS App (Unsigned)'
   inputs:
-    actions: 'build archive'
+    actions: 'archive'
     configuration: 'Release'
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: true
+    exportMethod: 'debugging'
     exportTeamId: '6N4F2PK5R3'
     signingOption: nosign
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Unsigned IPA'
+  displayName: 'Artifact Unprotected IPA'
   inputs:
-    pathToPublish: '$(Build.SourcesDirectory)/output'
-    artifactName: 'unsigned-ipa'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'unprotected'
+    publishLocation: 'Container'
