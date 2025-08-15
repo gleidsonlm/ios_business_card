@@ -1,0 +1,156 @@
+# Manual IPA Upload and TestFlight Release Pipeline
+# Trigger: Manual only
+trigger: none
+pr: none
+
+# Use macOS for Apple-specific tasks
+pool:
+  vmImage: 'macOS-latest'
+
+# Pipeline variables
+variables:
+  - name: bundleId
+    value: 'com.gleidsonlm.businesscard'
+  - name: appName
+    value: 'Business Card'
+
+stages:
+  # Stage 1: Manual IPA Upload Validation
+  - stage: ValidateIPA
+    displayName: 'Validate Uploaded IPA'
+    jobs:
+      - job: ValidateUpload
+        displayName: 'Validate IPA File'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download Manually Uploaded IPA'
+            inputs:
+              buildType: 'specific'
+              project: '$(System.TeamProject)'
+              definition: '$(System.DefinitionId)'
+              buildVersionToDownload: 'latest'
+              artifactName: 'manual-ipa'
+              targetPath: '$(Pipeline.Workspace)/ipa'
+            continueOnError: true
+
+          - task: Bash@3
+            displayName: 'Validate IPA Structure'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #!/bin/bash
+                set -e
+                
+                echo "=== IPA Validation Started ==="
+                
+                # Check if IPA exists
+                IPA_PATH=$(find "$(Pipeline.Workspace)" -name "*.ipa" | head -1)
+                
+                if [ -z "$IPA_PATH" ]; then
+                  echo "❌ ERROR: No IPA file found in artifacts"
+                  echo "Please upload an IPA file as 'manual-ipa' artifact before running this pipeline"
+                  echo ""
+                  echo "Upload Instructions:"
+                  echo "1. Go to Pipelines → [Previous Build] → Artifacts"
+                  echo "2. Upload your IPA file with artifact name: manual-ipa"
+                  echo "3. Re-run this pipeline"
+                  exit 1
+                fi
+                
+                echo "✅ Found IPA: $IPA_PATH"
+                
+                # Basic IPA validation
+                IPA_SIZE=$(du -h "$IPA_PATH" | cut -f1)
+                echo "📦 IPA Size: $IPA_SIZE"
+                
+                # Extract and validate bundle ID
+                mkdir -p temp_ipa
+                cd temp_ipa
+                unzip -q "$IPA_PATH"
+                
+                INFO_PLIST="Payload/$(ls Payload)/Info.plist"
+                if [ -f "$INFO_PLIST" ]; then
+                  BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                  APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                  BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                  
+                  echo "📱 Bundle ID: $BUNDLE_ID"
+                  echo "🔢 Version: $APP_VERSION"
+                  echo "🏗️ Build: $BUILD_NUMBER"
+                  
+                  # Validate bundle ID matches expected
+                  if [ "$BUNDLE_ID" != "$(bundleId)" ]; then
+                    echo "⚠️ WARNING: Bundle ID mismatch!"
+                    echo "Expected: $(bundleId)"
+                    echo "Found: $BUNDLE_ID"
+                    echo "Continuing anyway..."
+                  else
+                    echo "✅ Bundle ID matches expected value"
+                  fi
+                else
+                  echo "⚠️ WARNING: Could not read Info.plist"
+                fi
+                
+                # Copy IPA to staging for next stage
+                cp "$IPA_PATH" "$(Build.ArtifactStagingDirectory)/app.ipa"
+                
+                echo "=== IPA Validation Complete ==="
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Validated IPA'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/app.ipa'
+              artifactName: 'validated-ipa'
+              publishLocation: 'pipeline'
+
+  # Stage 2: TestFlight Release
+  - stage: ReleaseToTestFlight
+    displayName: 'Release to TestFlight'
+    dependsOn: ValidateIPA
+    condition: succeeded()
+    jobs:
+      - deployment: DeployToTestFlight
+        displayName: 'Deploy to TestFlight'
+        environment: 'TestFlight-Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Validated IPA'
+                  inputs:
+                    artifactName: 'validated-ipa'
+                    targetPath: '$(Pipeline.Workspace)/release'
+
+                - task: AppStoreRelease@1
+                  displayName: 'Upload to TestFlight'
+                  inputs:
+                    serviceEndpoint: 'AppStore-BusinessCard'  # Your service connection name
+                    applicationIdentifier: '$(bundleId)'
+                    appSpecificId: ''  # Leave empty to auto-detect
+                    appType: 'iOS'
+                    ipaPath: '$(Pipeline.Workspace)/release/app.ipa'
+                    releaseTrack: 'TestFlight'
+                    shouldSkipWaitingForProcessing: false
+                    shouldSkipSubmission: false
+                    teamId: '6N4F2PK5R3'  # Your team ID from the logs
+                    teamName: ''  # Leave empty if using team ID
+                    shouldInstallFastlane: true
+                    fastlaneVersionChoice: 'LatestVersion'
+
+                - task: Bash@3
+                  displayName: 'Release Summary'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      echo "=== TestFlight Release Complete ==="
+                      echo "✅ App successfully uploaded to TestFlight"
+                      echo "📱 Bundle ID: $(bundleId)"
+                      echo "🏷️ Release Track: TestFlight"
+                      echo ""
+                      echo "Next Steps:"
+                      echo "1. Check App Store Connect for processing status"
+                      echo "2. Add internal testers in App Store Connect"
+                      echo "3. Distribute to testers when processing completes"
+                      echo ""
+                      echo "App Store Connect: https://appstoreconnect.apple.com/"
