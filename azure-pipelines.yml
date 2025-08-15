@@ -17,15 +17,14 @@ steps:
         xcrun xcode-select --print-path
 
 - task: Xcode@5
-  displayName: 'Archive and Export Unsigned IPA'
+  displayName: 'Build and Archive iOS App (Unsigned)'
   inputs:
-    actions: 'build'
+    actions: 'build archive'  # Remove export
     configuration: 'Release'
-    sdk: 'iphoneos'
+    sdk: 'iphoneos' 
     scheme: 'businesscard'
-    packageApp: true
-    exportMethod: 'development'
-    args: 'CODE_SIGNING_ALLOWED=NO'
+    packageApp: false  # Critical: set to false
+    args: 'CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE=""'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Unsigned IPA'
