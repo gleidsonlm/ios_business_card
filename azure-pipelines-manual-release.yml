@@ -125,7 +125,7 @@ stages:
                 - task: AppStoreRelease@1
                   displayName: 'Upload to TestFlight'
                   inputs:
-                    serviceEndpoint: 'AppStore-BusinessCard'  # Your service connection name
+                    serviceEndpoint: 'AppleAppStoreGleidsonLM'  # Your service connection name
                     applicationIdentifier: '$(bundleId)'
                     appSpecificId: ''  # Leave empty to auto-detect
                     appType: 'iOS'
