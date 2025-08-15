@@ -24,8 +24,10 @@ steps:
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: true
+    exportOptions: 'plist'
     exportMethod: 'debugging'
     exportTeamId: '6N4F2PK5R3'
+    exportOptionsPlist: "$(Build.SourcesDirectory)/exportOptions.plist"
     signingOption: nosign
 
 - task: PublishBuildArtifacts@1
