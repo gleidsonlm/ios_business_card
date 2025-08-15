@@ -24,10 +24,9 @@ steps:
     sdk: 'iphoneos'
     scheme: 'businesscard'
     packageApp: true
-    exportOptions: 'specify'
-    exportMethod: 'debugging'
-    exportTeamId: '6N4F2PK5R3'
-    exportArgs: 'CODE_SIGNING_ALLOWED=NO'
+    exportOptions: 'plist'
+    exportOptionsPlist: 'exportOptions.plist'
+    args: 'CODE_SIGNING_ALLOWED=NO'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Unsigned IPA'
