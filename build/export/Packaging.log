@@ -1,109 +1,109 @@
-2025-08-16 11:44:30 +0000 [MT] Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0x10fa08070; archive(resolved)="<IDEArchive: 0x600001166d80>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team(resolved)="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
+2025-08-16 11:56:11 +0000 [MT] Initial pipeline context: <IDEDistributionProcessingPipelineContext: 0x10e605810; archive(resolved)="<IDEArchive: 0x600002a80e00>", distributionTask(resolved)="2", distributionDestination(resolved)="1", distributionMethod(resolved)="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team(resolved)="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
 	Chain (14, self inclusive):
-	<IDEDistributionProcessingPipelineContext: 0x10fa08070; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionProcessingPipelineContext: 0x10fa07de0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x10fa07bd0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12bf3cff0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12bf3c780; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12bf3c570; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12bf3bfd0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12d9b7270; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12d9b7bc0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="<IDEProvisioningBasicTeam: 0x600003b0a060; teamID='6N4F2PK5R3', teamName='(null)'>">
-	<IDEDistributionContext: 0x12d9b79b0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="(null)">
-	<IDEDistributionContext: 0x12d9aff30; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="(null)">
-	<IDEDistributionContext: 0x12d828830; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="(null)">
-	<IDEDistributionContext: 0x12bf228c0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x60000380aa50>", team="(null)">
-	<IDEDistributionContext: 0x12d812cb0; archive = "<IDEArchive: 0x600001166d80>", distributionMethod="(null)", team="(null)">
-</IDEDistributionProcessingPipelineContext: 0x10fa08070>
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionCreateDestRootStep
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionCopyItemStep
-2025-08-16 11:44:30 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root/Payload/businesscard.app'
-2025-08-16 11:44:30 +0000  >>> Copying /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app 
-2025-08-16 11:44:30 +0000  copying file ./AppIcon60x60@2x.png ... 
-2025-08-16 11:44:30 +0000  13060 bytes for ./AppIcon60x60@2x.png
-2025-08-16 11:44:30 +0000  copying file ./Assets.car ... 
-2025-08-16 11:44:30 +0000  680256 bytes for ./Assets.car
-2025-08-16 11:44:30 +0000  copying file ./AppIcon76x76@2x~ipad.png ... 
-2025-08-16 11:44:30 +0000  17758 bytes for ./AppIcon76x76@2x~ipad.png
-2025-08-16 11:44:30 +0000  copying file ./PrivacyInfo.xcprivacy ... 
-2025-08-16 11:44:30 +0000  1635 bytes for ./PrivacyInfo.xcprivacy
-2025-08-16 11:44:30 +0000  copying file ./businesscard ... 
-2025-08-16 11:44:30 +0000  196512 bytes for ./businesscard
-2025-08-16 11:44:30 +0000  copying file ./Info.plist ... 
-2025-08-16 11:44:30 +0000  1603 bytes for ./Info.plist
-2025-08-16 11:44:30 +0000  copying file ./PkgInfo ... 
-2025-08-16 11:44:30 +0000  8 bytes for ./PkgInfo
-2025-08-16 11:44:30 +0000 [MT] /usr/bin/ditto exited with 0
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionEmbedProfileStep
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionInfoPlistStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionInfoPlistStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionAppThinningPlistStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionAppThinningPlistStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionSymbolsStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionSymbolsStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionAppThinningStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionAppThinningStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionArchThinningStep
-2025-08-16 11:44:30 +0000 [MT] Item /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
-2025-08-16 11:44:30 +0000 [MT] Archs to thin for item /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app are ["arm64e"]
-2025-08-16 11:44:30 +0000 [MT] Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root/Payload/businesscard.app/businesscard' '-verify_arch' 'arm64e'
-2025-08-16 11:44:30 +0000 [MT] /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
-2025-08-16 11:44:30 +0000 [MT] Skipping architecture thinning for item "businesscard" because arch "arm64e" wasn't found
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionODRStep
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionStripXattrsStep
-2025-08-16 11:44:30 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionCodesignStep
-2025-08-16 11:44:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0x600001efc660; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600001166df0:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x600001efc5a0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'>: {
+	<IDEDistributionProcessingPipelineContext: 0x10e605810; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionProcessingPipelineContext: 0x10e604530; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x10e60b110; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x11fe50880; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x11fe4f040; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x11fe501c0; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x1211bfc50; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x1211b48d0; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x121136290; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="<IDEProvisioningBasicTeam: 0x6000000a88a0; teamID='6N4F2PK5R3', teamName='(null)'>">
+	<IDEDistributionContext: 0x1211bfa40; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="(null)">
+	<IDEDistributionContext: 0x1211bf630; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="(null)">
+	<IDEDistributionContext: 0x1211bf420; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="(null)">
+	<IDEDistributionContext: 0x12103c090; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="<IDEDistributionMethodDevelopmentSigned: 0x6000003a7bb0>", team="(null)">
+	<IDEDistributionContext: 0x1210394a0; archive = "<IDEArchive: 0x600002a80e00>", distributionMethod="(null)", team="(null)">
+</IDEDistributionProcessingPipelineContext: 0x10e605810>
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionCreateDestRootStep
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionCopyItemStep
+2025-08-16 11:56:11 +0000 [MT] Running /usr/bin/ditto '-V' '/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root/Payload/businesscard.app'
+2025-08-16 11:56:11 +0000  >>> Copying /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app 
+2025-08-16 11:56:11 +0000  copying file ./AppIcon60x60@2x.png ... 
+2025-08-16 11:56:11 +0000  13060 bytes for ./AppIcon60x60@2x.png
+2025-08-16 11:56:11 +0000  copying file ./Assets.car ... 
+2025-08-16 11:56:11 +0000  680256 bytes for ./Assets.car
+2025-08-16 11:56:11 +0000  copying file ./AppIcon76x76@2x~ipad.png ... 
+2025-08-16 11:56:11 +0000  17758 bytes for ./AppIcon76x76@2x~ipad.png
+2025-08-16 11:56:11 +0000  copying file ./PrivacyInfo.xcprivacy ... 
+2025-08-16 11:56:11 +0000  1635 bytes for ./PrivacyInfo.xcprivacy
+2025-08-16 11:56:11 +0000  copying file ./businesscard ... 
+2025-08-16 11:56:11 +0000  196512 bytes for ./businesscard
+2025-08-16 11:56:11 +0000  copying file ./Info.plist ... 
+2025-08-16 11:56:11 +0000  1603 bytes for ./Info.plist
+2025-08-16 11:56:11 +0000  copying file ./PkgInfo ... 
+2025-08-16 11:56:11 +0000  8 bytes for ./PkgInfo
+2025-08-16 11:56:11 +0000 [MT] /usr/bin/ditto exited with 0
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionEmbedProfileStep
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionInfoPlistStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionInfoPlistStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionAppThinningPlistStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionAppThinningPlistStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionSymbolsStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionSymbolsStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionAppThinningStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionAppThinningStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionArchThinningStep
+2025-08-16 11:56:11 +0000 [MT] Item /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app doesn't have the entitlement com.apple.developer.web-browser-engine.host enabled, returning ["arm64e"]
+2025-08-16 11:56:11 +0000 [MT] Archs to thin for item /Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app are ["arm64e"]
+2025-08-16 11:56:11 +0000 [MT] Running /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root/Payload/businesscard.app/businesscard' '-verify_arch' 'arm64e'
+2025-08-16 11:56:11 +0000 [MT] /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo exited with 1
+2025-08-16 11:56:11 +0000 [MT] Skipping architecture thinning for item "businesscard" because arch "arm64e" wasn't found
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionODRStep
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionStripXattrsStep
+2025-08-16 11:56:11 +0000 [MT] Skipping stripping extended attributes because the codesign step will strip them.
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionCodesignStep
+2025-08-16 11:56:11 +0000 [MT] Entitlements for <IDEDistributionItem: 0x60000255d1a0; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600002a80e70:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x60000255d0e0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'>: {
     "application-identifier" = "6N4F2PK5R3.com.gleidsonlm.businesscard";
     "com.apple.developer.team-identifier" = 6N4F2PK5R3;
     "get-task-allow" = 1;
 }
-2025-08-16 11:44:30 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
-2025-08-16 11:44:30 +0000 [MT] Entitlements for <IDEDistributionItem: 0x600001efc660; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600001166df0:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x600001efc5a0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'> are: {
+2025-08-16 11:56:11 +0000 [MT] Associated App Clip Identifiers Filter: Skipping because "com.apple.developer.associated-appclip-app-identifiers" is not present
+2025-08-16 11:56:11 +0000 [MT] Entitlements for <IDEDistributionItem: 0x60000255d1a0; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600002a80e70:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x60000255d0e0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'> are: {
     "application-identifier" = "6N4F2PK5R3.com.gleidsonlm.businesscard";
     "com.apple.developer.team-identifier" = 6N4F2PK5R3;
     "get-task-allow" = 1;
 }
-2025-08-16 11:44:30 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0x600001efc660; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600001166df0:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x600001efc5a0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'> to: /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/entitlements~~~hva8bm
-2025-08-16 11:44:30 +0000 [MT] invoking codesign: <NSConcreteTask: 0x600001a47bb0; launchPath='/usr/bin/codesign', arguments='(
+2025-08-16 11:56:11 +0000 [MT] Writing entitlements for <IDEDistributionItem: 0x60000255d1a0; bundleID='com.gleidsonlm.businesscard', path='<DVTFilePath:0x600002a80e70:'/Users/gleidsonlm/Projects/ios_business_card/build/businesscard.xcarchive/Products/Applications/businesscard.app'>', codeSigningInfo='<_DVTCodeSigningInformation_Path: 0x60000255d0e0; isSigned='0', isAdHocSigned='0', signingCertificate='(null)', entitlements='(null)', teamID='(null)', identifier='(null)', executablePath='(null)', hardenedRuntime='0'>'> to: /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/entitlements~~~GFTSwy
+2025-08-16 11:56:11 +0000 [MT] invoking codesign: <NSConcreteTask: 0x6000021e59f0; launchPath='/usr/bin/codesign', arguments='(
     "-f",
     "-s",
     CC36EA855D3EEAF28D28CBCCFC326136096D13BD,
     "--entitlements",
-    "/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/entitlements~~~hva8bm",
+    "/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/entitlements~~~GFTSwy",
     "--preserve-metadata=identifier,flags,runtime",
     "--generate-entitlement-der",
     "--strip-disallowed-xattrs",
     "-vvv",
-    "/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root/Payload/businesscard.app"
+    "/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root/Payload/businesscard.app"
 )'>
-2025-08-16 11:44:30 +0000 [MT] codesign output: /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root/Payload/businesscard.app: signed app bundle with Mach-O thin (arm64) [com.gleidsonlm.businesscard]
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionZipODRItemStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionCreateIPAStep
-2025-08-16 11:44:30 +0000 [MT] Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Packages/businesscard.ipa'
-2025-08-16 11:44:30 +0000  >>> Copying /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root 
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/_CodeSignature/CodeResources ... 
-2025-08-16 11:44:30 +0000  3003 bytes for ./Payload/businesscard.app/_CodeSignature/CodeResources
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/AppIcon60x60@2x.png ... 
-2025-08-16 11:44:30 +0000  13060 bytes for ./Payload/businesscard.app/AppIcon60x60@2x.png
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/Assets.car ... 
-2025-08-16 11:44:30 +0000  680256 bytes for ./Payload/businesscard.app/Assets.car
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/AppIcon76x76@2x~ipad.png ... 
-2025-08-16 11:44:30 +0000  17758 bytes for ./Payload/businesscard.app/AppIcon76x76@2x~ipad.png
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/PrivacyInfo.xcprivacy ... 
-2025-08-16 11:44:30 +0000  1635 bytes for ./Payload/businesscard.app/PrivacyInfo.xcprivacy
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/businesscard ... 
-2025-08-16 11:44:30 +0000  217216 bytes for ./Payload/businesscard.app/businesscard
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/embedded.mobileprovision ... 
-2025-08-16 11:44:30 +0000  16560 bytes for ./Payload/businesscard.app/embedded.mobileprovision
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/Info.plist ... 
-2025-08-16 11:44:30 +0000  1603 bytes for ./Payload/businesscard.app/Info.plist
-2025-08-16 11:44:30 +0000  copying file ./Payload/businesscard.app/PkgInfo ... 
+2025-08-16 11:56:11 +0000 [MT] codesign output: /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root/Payload/businesscard.app: signed app bundle with Mach-O thin (arm64) [com.gleidsonlm.businesscard]
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionZipODRItemStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionZipODRItemStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionCreateIPAStep
+2025-08-16 11:56:11 +0000 [MT] Running /usr/bin/ditto '-V' '-c' '-k' '--norsrc' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root' '/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Packages/businesscard.ipa'
+2025-08-16 11:56:11 +0000  >>> Copying /var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root 
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/_CodeSignature/CodeResources ... 
+2025-08-16 11:56:11 +0000  3003 bytes for ./Payload/businesscard.app/_CodeSignature/CodeResources
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/AppIcon60x60@2x.png ... 
+2025-08-16 11:56:11 +0000  13060 bytes for ./Payload/businesscard.app/AppIcon60x60@2x.png
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/Assets.car ... 
+2025-08-16 11:56:11 +0000  680256 bytes for ./Payload/businesscard.app/Assets.car
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/AppIcon76x76@2x~ipad.png ... 
+2025-08-16 11:56:11 +0000  17758 bytes for ./Payload/businesscard.app/AppIcon76x76@2x~ipad.png
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/PrivacyInfo.xcprivacy ... 
+2025-08-16 11:56:11 +0000  1635 bytes for ./Payload/businesscard.app/PrivacyInfo.xcprivacy
+copying file ./Payload/businesscard.app/businesscard ... 
+2025-08-16 11:56:11 +0000  217216 bytes for ./Payload/businesscard.app/businesscard
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/embedded.mobileprovision ... 
+2025-08-16 11:56:11 +0000  16560 bytes for ./Payload/businesscard.app/embedded.mobileprovision
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/Info.plist ... 
+2025-08-16 11:56:11 +0000  1603 bytes for ./Payload/businesscard.app/Info.plist
+2025-08-16 11:56:11 +0000  copying file ./Payload/businesscard.app/PkgInfo ... 
 8 bytes for ./Payload/businesscard.app/PkgInfo
-2025-08-16 11:44:30 +0000 [MT] /usr/bin/ditto exited with 0
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionAppStoreInformationStep
-2025-08-16 11:44:30 +0000 [MT] Skipping step: IDEDistributionAppStoreInformationStep because it said so
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionGenerateProcessedDistributionItems
-2025-08-16 11:44:30 +0000 [MT] IDEDistributionItem init <DVTFilePath:0x60000116c8c0:'/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~oqSRAE/Root/Payload/businesscard.app'>
-2025-08-16 11:44:30 +0000 [MT] Processing step: IDEDistributionCreateManifestStep
+2025-08-16 11:56:11 +0000 [MT] /usr/bin/ditto exited with 0
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionAppStoreInformationStep
+2025-08-16 11:56:11 +0000 [MT] Skipping step: IDEDistributionAppStoreInformationStep because it said so
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionGenerateProcessedDistributionItems
+2025-08-16 11:56:11 +0000 [MT] IDEDistributionItem init <DVTFilePath:0x600002a63170:'/var/folders/s_/p80mlck12ngbz8566htgyt8r0000gn/T/XcodeDistPipeline.~~~l3KIjv/Root/Payload/businesscard.app'>
+2025-08-16 11:56:11 +0000 [MT] Processing step: IDEDistributionCreateManifestStep
