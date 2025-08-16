@@ -24,7 +24,6 @@ variables:
     value: '$(Build.SourcesDirectory)/build'
 
 stages:
-  # STAGE 1: Version Management (NEW)
   - stage: VersionManagement
     displayName: 'Manage App Version'
     jobs:
@@ -36,67 +35,68 @@ stages:
             displayName: 'Checkout with Write Permissions'
 
           - task: Bash@3
-            displayName: 'Create Scripts Directory'
+            displayName: 'Investigate Project Structure'
             inputs:
               targetType: 'inline'
               script: |
-                mkdir -p scripts
-                echo "Scripts directory created"
+                #!/bin/bash
+                echo "=== Project Structure Investigation ==="
+                echo "Current working directory: $(pwd)"
+                echo "Source directory: $(Build.SourcesDirectory)"
+                echo "Repository: $(Build.Repository.Name)"
+                echo ""
+                
+                echo "=== Searching for Info.plist files ==="
+                find "$(Build.SourcesDirectory)" -name "Info.plist" -type f 2>/dev/null | while read plist; do
+                  echo "Found Info.plist: $plist"
+                  
+                  # Check if this is likely the main app's Info.plist
+                  bundle_id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$plist" 2>/dev/null || echo "unknown")
+                  if echo "$bundle_id" | grep -q "com.gleidsonlm.businesscard"; then
+                    echo "  ✅ This appears to be the main app's Info.plist"
+                    echo "  Bundle ID: $bundle_id"
+                    version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$plist" 2>/dev/null || echo "unknown")
+                    build=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$plist" 2>/dev/null || echo "unknown")
+                    echo "  Current Version: $version"
+                    echo "  Current Build: $build"
+                  else
+                    echo "  ℹ️ Different bundle ID: $bundle_id"
+                  fi
+                  echo ""
+                done
+                
+                echo "=== Directory Structure (top 3 levels) ==="
+                find "$(Build.SourcesDirectory)" -maxdepth 3 -type d | sort | head -20
 
           - task: Bash@3
-            displayName: 'Auto-Increment Bundle Version'
+            displayName: 'Create and Validate Scripts Directory'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #!/bin/bash
+                echo "Creating scripts directory..."
+                mkdir -p scripts
+                
+                echo "Validating increment-version.sh exists..."
+                if [ -f "scripts/increment-version.sh" ]; then
+                  echo "✅ Script exists"
+                  echo "Making executable..."
+                  chmod +x scripts/increment-version.sh
+                  echo "✅ Script is now executable"
+                else
+                  echo "❌ ERROR: scripts/increment-version.sh not found"
+                  echo "Please ensure the script is committed to the repository"
+                  exit 1
+                fi
+
+          - task: Bash@3
+            displayName: 'Auto-Increment Bundle Version (Enhanced)'
             name: versionUpdate
             inputs:
               targetType: 'filePath'
               filePath: 'scripts/increment-version.sh'
               workingDirectory: '$(Build.SourcesDirectory)'
 
-          - task: Bash@3
-            displayName: 'Commit Version Update'
-            inputs:
-              targetType: 'inline'
-              script: |
-                #!/bin/bash
-                set -e
-                
-                echo "=== Committing Version Update ==="
-                
-                # Configure git
-                git config user.email "azure-pipeline@gleidsonlm.com"
-                git config user.name "Azure Pipeline Bot"
-                
-                # Check if there are changes to commit
-                if git diff --quiet businesscard/Info.plist; then
-                  echo "ℹ️ No version changes to commit"
-                else
-                  echo "📝 Committing version update..."
-                  
-                  # Get new version for commit message
-                  NEW_VERSION=$(versionUpdate.newBundleVersion)
-                  CURRENT_APP_VERSION=$(versionUpdate.currentAppVersion)
-                  
-                  git add businesscard/Info.plist
-                  git commit -m "chore: Auto-increment bundle version to $NEW_VERSION
-                  
-                  - App Version: $CURRENT_APP_VERSION
-                  - Bundle Version: $NEW_VERSION
-                  - Automated by: Azure Pipeline
-                  - Timestamp: $(date '+%Y-%m-%d %H:%M:%S UTC')
-                  
-                  This ensures TestFlight upload compatibility."
-                  
-                  git push origin main
-                  echo "✅ Version update committed and pushed"
-                fi
-
-          - task: PublishPipelineArtifact@1
-            displayName: 'Publish Updated Source'
-            inputs:
-              targetPath: '$(Build.SourcesDirectory)'
-              artifactName: 'updated-source'
-              publishLocation: 'pipeline'
-
-  # STAGE 2: Validate and Prepare IPA (UPDATED)
   - stage: ValidateIPA
     displayName: 'Validate Build Artifacts'
     dependsOn: VersionManagement
@@ -206,7 +206,6 @@ stages:
               artifactName: 'testflight-ipa'
               publishLocation: 'pipeline'
 
-  # STAGE 3: Deploy to TestFlight (EXISTING - Updated)
   - stage: DeployTestFlight
     displayName: 'Deploy to TestFlight'
     dependsOn: 
