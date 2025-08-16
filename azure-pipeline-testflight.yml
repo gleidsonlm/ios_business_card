@@ -1,0 +1,212 @@
+# TestFlight Deployment Pipeline
+# Deploys existing IPA from build folder to TestFlight
+name: TestFlight-Deploy-$(Date:yyyyMMdd)-$(Rev:r)
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - build/*
+
+# Manual trigger option
+pr: none
+
+pool:
+  vmImage: 'macOS-latest'
+
+variables:
+  - name: bundleId
+    value: 'com.gleidsonlm.businesscard'
+  - name: appName
+    value: 'Business Card'
+  - name: buildPath
+    value: '$(Build.SourcesDirectory)/build'
+
+stages:
+  # Stage 1: Validate and Prepare IPA
+  - stage: ValidateIPA
+    displayName: 'Validate Build Artifacts'
+    jobs:
+      - job: ValidateBuildArtifacts
+        displayName: 'Validate IPA and Build Files'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Source Code'
+
+          - task: Bash@3
+            displayName: 'Discover and Validate IPA'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #!/bin/bash
+                set -e
+                
+                echo "=== Build Artifact Discovery ==="
+                echo "Build path: $(buildPath)"
+                echo "Source directory: $(Build.SourcesDirectory)"
+                
+                # Show build folder structure
+                if [ -d "$(buildPath)" ]; then
+                  echo "✅ Build folder exists"
+                  echo "Build folder contents:"
+                  find "$(buildPath)" -type f -name "*.ipa" -o -name "*.xcarchive" -o -name "*.app" | head -20
+                else
+                  echo "❌ Build folder not found at $(buildPath)"
+                  echo "Available directories:"
+                  find "$(Build.SourcesDirectory)" -type d -name "*build*" -o -name "*archive*" | head -10
+                  exit 1
+                fi
+                
+                # Find IPA file
+                IPA_FILE=$(find "$(buildPath)" -name "*.ipa" -type f | head -1)
+                
+                if [ -z "$IPA_FILE" ]; then
+                  echo "❌ No IPA file found in build folder"
+                  echo "Available files in build folder:"
+                  ls -la "$(buildPath)/" || echo "Build folder is empty"
+                  
+                  # Look for xcarchive to potentially extract IPA
+                  ARCHIVE_FILE=$(find "$(buildPath)" -name "*.xcarchive" -type d | head -1)
+                  if [ -n "$ARCHIVE_FILE" ]; then
+                    echo "Found xcarchive: $ARCHIVE_FILE"
+                    echo "You may need to export IPA from this archive first"
+                  fi
+                  exit 1
+                fi
+                
+                echo "✅ Found IPA: $IPA_FILE"
+                
+                # Validate IPA
+                IPA_SIZE=$(du -h "$IPA_FILE" | cut -f1)
+                echo "📦 IPA Size: $IPA_SIZE"
+                
+                # Extract bundle info
+                echo "=== IPA Validation ==="
+                TEMP_DIR=$(mktemp -d)
+                cd "$TEMP_DIR"
+                unzip -q "$IPA_FILE"
+                
+                # Find the app bundle
+                APP_BUNDLE=$(find . -name "*.app" -type d | head -1)
+                if [ -n "$APP_BUNDLE" ]; then
+                  INFO_PLIST="$APP_BUNDLE/Info.plist"
+                  if [ -f "$INFO_PLIST" ]; then
+                    BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                    APP_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                    BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST" 2>/dev/null || echo "unknown")
+                    
+                    echo "📱 Bundle ID: $BUNDLE_ID"
+                    echo "🔢 Version: $APP_VERSION"
+                    echo "🏗️ Build: $BUILD_NUMBER"
+                    
+                    # Validate bundle ID
+                    if [ "$BUNDLE_ID" = "$(bundleId)" ]; then
+                      echo "✅ Bundle ID matches expected value"
+                    else
+                      echo "⚠️ WARNING: Bundle ID mismatch!"
+                      echo "Expected: $(bundleId)"
+                      echo "Found: $BUNDLE_ID"
+                    fi
+                  else
+                    echo "⚠️ Could not read Info.plist"
+                  fi
+                else
+                  echo "⚠️ Could not find app bundle in IPA"
+                fi
+                
+                # Clean up temp directory
+                rm -rf "$TEMP_DIR"
+                
+                # Copy IPA to staging area for next stage
+                mkdir -p "$(Build.ArtifactStagingDirectory)"
+                cp "$IPA_FILE" "$(Build.ArtifactStagingDirectory)/businesscard.ipa"
+                
+                # Set pipeline variable for IPA path
+                echo "##vso[task.setvariable variable=ipaPath;isOutput=true]$(Build.ArtifactStagingDirectory)/businesscard.ipa"
+                
+                echo "=== Validation Complete ==="
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Validated IPA'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/businesscard.ipa'
+              artifactName: 'testflight-ipa'
+              publishLocation: 'pipeline'
+
+  # Stage 2: Deploy to TestFlight
+  - stage: DeployTestFlight
+    displayName: 'Deploy to TestFlight'
+    dependsOn: ValidateIPA
+    condition: succeeded()
+    jobs:
+      - deployment: TestFlightRelease
+        displayName: 'TestFlight Release'
+        environment: 'TestFlight-Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download IPA for Release'
+                  inputs:
+                    artifactName: 'testflight-ipa'
+                    targetPath: '$(Pipeline.Workspace)/release'
+
+                - task: Bash@3
+                  displayName: 'Pre-Release Verification'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      echo "=== Pre-Release Verification ==="
+                      IPA_PATH="$(Pipeline.Workspace)/release/businesscard.ipa"
+                      
+                      if [ -f "$IPA_PATH" ]; then
+                        echo "✅ IPA ready for upload: $IPA_PATH"
+                        echo "📦 Size: $(du -h "$IPA_PATH" | cut -f1)"
+                        
+                        # Set variable for AppStoreRelease task
+                        echo "##vso[task.setvariable variable=finalIpaPath]$IPA_PATH"
+                      else
+                        echo "❌ IPA not found at expected location"
+                        ls -la "$(Pipeline.Workspace)/release/"
+                        exit 1
+                      fi
+
+                - task: AppStoreRelease@1
+                  displayName: 'Upload to TestFlight'
+                  inputs:
+                    serviceEndpoint: 'AppStore-BusinessCard-TestFlight'
+                    applicationIdentifier: '$(bundleId)'
+                    appSpecificId: ''
+                    appType: 'iOS'
+                    ipaPath: '$(finalIpaPath)'
+                    releaseTrack: 'TestFlight'
+                    shouldSkipWaitingForProcessing: false
+                    shouldSkipSubmission: false
+                    teamId: ''  # Leave empty if using API key
+                    teamName: ''
+                    shouldInstallFastlane: true
+                    fastlaneVersionChoice: 'LatestVersion'
+                    fastlaneArguments: '--verbose'
+
+                - task: Bash@3
+                  displayName: 'TestFlight Release Summary'
+                  inputs:
+                    targetType: 'inline'
+                    script: |
+                      echo "=== TestFlight Release Complete ==="
+                      echo "✅ Business Card app uploaded to TestFlight"
+                      echo "📱 Bundle ID: $(bundleId)"
+                      echo "🏷️ Release Track: TestFlight"
+                      echo "⏰ Upload Time: $(date)"
+                      echo ""
+                      echo "📋 Next Steps:"
+                      echo "1. Monitor App Store Connect for processing status"
+                      echo "2. Add internal testers when processing completes"
+                      echo "3. Distribute build to testers"
+                      echo "4. Collect feedback and iterate"
+                      echo ""
+                      echo "🔗 App Store Connect: https://appstoreconnect.apple.com/"
+                      echo "🔗 TestFlight: https://appstoreconnect.apple.com/apps/$(bundleId)/testflight"
