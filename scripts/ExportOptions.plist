@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Export Method: app-store-connect for TestFlight/App Store distribution -->
+    <key>method</key>
+    <string>app-store-connect</string>
+    
+    <!-- Team ID: Your Apple Developer Team ID -->
+    <key>teamID</key>
+    <string>"$AppleDeveloperTeamID"</string>
+    
+    <!-- Upload Symbols: Include for crash reporting -->
+    <key>uploadSymbols</key>
+    <true/>
+    
+    <!-- Upload Bitcode: Include if app uses bitcode -->
+    <key>uploadBitcode</key>
+    <false/>
+    
+    <!-- Compilation Bitcode: For app thinning -->
+    <key>compileBitcode</key>
+    <true/>
+    
+    <!-- Strip Swift Symbols: Reduce IPA size -->
+    <key>stripSwiftSymbols</key>
+    <true/>
+    
+    <!-- Thinning: Create optimized variants -->
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
+    
+    <!-- Provisioning Profiles: Let Xcode manage automatically -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.gleidsonlm.businesscard</key>
+        <string>match AppStore com.gleidsonlm.businesscard</string>
+    </dict>
+    
+    <!-- Signing Certificate: Distribution certificate -->
+    <key>signingCertificate</key>
+    <string>iPhone Distribution</string>
+    
+    <!-- Signing Style: Automatic or Manual -->
+    <key>signingStyle</key>
+    <string>automatic</string>
+    
+    <!-- Export Compliance: Already configured in Info.plist -->
+    <key>manageAppVersionAndBuildNumber</key>
+    <false/>
+</dict>
+</plist>
