@@ -22,21 +22,6 @@ stages:
               apiKeyId: $(myApiKeyId)
               apiKeyIssuerId: $(myApiKeyIssuerId)
               apitoken: $(myApitoken)
-
-          - task: Bash@3
-            displayName: 'Validate IPA Exists'
-            inputs:
-              targetType: 'inline'
-              script: |
-                export ipaFile=$(find . -name "*.ipa" -type f | head -1)
-                if [ -z "$ipaFile" ]; then
-                  echo "❌ No IPA found in the repository"
-                  echo "Please build locally and commit IPA to repository"
-                  exit 1
-                fi
-                echo "✅ Found IPA: $ipaFile"
-                echo "##vso[task.setvariable variable=ipaPath]$ipaFile"
-
           - task: AppStoreRelease@1
             displayName: "Publish to AppStore TestFlight (Fastlane)"
             inputs:
@@ -46,7 +31,7 @@ stages:
               apitoken: "$(apitoken)"
               releaseTrack: "TestFlight"
               appType: "iOS"
-              ipaPath: "$ipaFile"
+              ipaPath: "./BusinessCard.ipa"
               appSpecificId: "$appSpecificId"
               releaseNotes: "./release.txt"
               distributedToExternalTesters: true
