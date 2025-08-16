@@ -14,7 +14,7 @@ stages:
     displayName: 'Upload to TestFlight'
     jobs:
       - job: UploadIPA
-        displayName: 'Upload Pre-built IPA'
+        displayName: 'Upload prebuilt IPA to TestFlight'
         steps:
           - checkout: self
             displayName: 'Checkout Repository'
@@ -28,10 +28,10 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                export ipaFile=$(find build/ -name "*.ipa" -type f | head -1)
+                export ipaFile=$(find . -name "*.ipa" -type f | head -1)
                 if [ -z "$ipaFile" ]; then
-                  echo "❌ No IPA found in build/ folder"
-                  echo "Please build locally and commit IPA to build/ folder"
+                  echo "❌ No IPA found in the repository"
+                  echo "Please build locally and commit IPA to repository"
                   exit 1
                 fi
                 echo "✅ Found IPA: $ipaFile"
