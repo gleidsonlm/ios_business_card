@@ -1,282 +1,53 @@
-# TestFlight Deployment Pipeline - Fixed Artifact Dependencies
-# Version: 2.1 - Eliminated artifact download issues
-name: TestFlight-Deploy-$(Date:yyyyMMdd)-$(Rev:r)
+# Minimal pipeline - just uploads pre-built IPA
+name: TestFlight-Upload-$(Date:yyyyMMdd)-$(Rev:r)
 
 trigger:
   branches:
     include:
       - main
-      - azure-pipeline-testflight
   paths:
     include:
-      - build/*
-      - businesscard/**
-      - ios_business_card/**
-      - "*.plist"
-
-pr: none
+      - build/*.ipa
 
 pool:
   vmImage: 'macOS-latest'
 
-variables:
-  - name: bundleId
-    value: 'com.gleidsonlm.businesscard'
-  - name: appName
-    value: 'Business Card'
-
 stages:
-  # STAGE 1: Version Management
-  - stage: VersionManagement
-    displayName: 'Version Management'
+  - stage: Upload
+    displayName: 'Upload to TestFlight'
     jobs:
-      - job: IncrementVersion
-        displayName: 'Auto-Increment Bundle Version'
+      - job: UploadIPA
+        displayName: 'Upload Pre-built IPA'
         steps:
           - checkout: self
-            persistCredentials: true
             displayName: 'Checkout Repository'
 
           - task: Bash@3
-            displayName: 'Project Structure Analysis'
+            displayName: 'Validate IPA Exists'
             inputs:
               targetType: 'inline'
               script: |
-                #!/bin/bash
-                echo "=== Project Structure Analysis ==="
-                echo "Working Directory: $(pwd)"
-                echo "Build Agent: $(Agent.Name)"
-                echo "Build Number: $(Build.BuildNumber)"
-                echo "Branch: $(Build.SourceBranchName)"
-                echo ""
-                
-                echo "=== Searching for Info.plist files ==="
-                find . -name "Info.plist" -type f 2>/dev/null | while read plist; do
-                  echo "Found: $plist"
-                  bundle_id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$plist" 2>/dev/null || echo "unknown")
-                  version=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$plist" 2>/dev/null || echo "unknown")
-                  build=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$plist" 2>/dev/null || echo "unknown")
-                  echo "  Bundle ID: $bundle_id"
-                  echo "  Version: $version"
-                  echo "  Build: $build"
-                  
-                  if [[ "$bundle_id" == *"com.gleidsonlm.businesscard"* ]]; then
-                    echo "  ✅ Main app Info.plist identified"
-                  fi
-                  echo ""
-                done
-
-          - task: Bash@3
-            displayName: 'Setup and Run Version Increment'
-            name: versionUpdate
-            inputs:
-              targetType: 'inline'
-              script: |
-                #!/bin/bash
-                set -e
-                
-                # Create the version increment script inline
-                mkdir -p scripts
-                
-                cat > scripts/increment-version.sh << 'EOF'
-                #!/bin/bash
-                # Bundle Version Auto-Increment Script - Inline Version
-                set -e
-                
-                readonly BUNDLE_ID="com.gleidsonlm.businesscard"
-                readonly RED='\033[0;31m'
-                readonly GREEN='\033[0;32m'
-                readonly YELLOW='\033[1;33m'
-                readonly BLUE='\033[0;34m'
-                readonly NC='\033[0m'
-                
-                log_info() { echo -e "${BLUE}ℹ️  INFO${NC}: $1"; }
-                log_success() { echo -e "${GREEN}✅ SUCCESS${NC}: $1"; }
-                log_error() { echo -e "${RED}❌ ERROR${NC}: $1" >&2; }
-                
-                # Find Info.plist
-                INFO_PLIST_PATH=""
-                while IFS= read -r -d '' plist; do
-                  bundle_id=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$plist" 2>/dev/null || echo "")
-                  if [ "$bundle_id" = "$BUNDLE_ID" ]; then
-                    INFO_PLIST_PATH="$plist"
-                    break
-                  fi
-                done < <(find . -name "Info.plist" -type f -print0 2>/dev/null)
-                
-                if [ -z "$INFO_PLIST_PATH" ]; then
-                  log_error "No Info.plist found with bundle ID: $BUNDLE_ID"
+                IPA_FILE=$(find build/ -name "*.ipa" -type f | head -1)
+                if [ -z "$IPA_FILE" ]; then
+                  echo "❌ No IPA found in build/ folder"
+                  echo "Please build locally and commit IPA to build/ folder"
                   exit 1
                 fi
-                
-                log_success "Found Info.plist: $INFO_PLIST_PATH"
-                
-                # Read current versions
-                CURRENT_VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$INFO_PLIST_PATH" 2>/dev/null || echo "1.0.0")
-                CURRENT_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST_PATH" 2>/dev/null || echo "1")
-                
-                log_info "Current Version: $CURRENT_VERSION"
-                log_info "Current Build: $CURRENT_BUILD"
-                
-                # Calculate new build
-                NEW_BUILD=$(date '+%Y%m%d%H%M')
-                if [ "$NEW_BUILD" -le "$CURRENT_BUILD" ]; then
-                  NEW_BUILD=$((CURRENT_BUILD + 1))
-                fi
-                
-                log_info "New Build: $NEW_BUILD"
-                
-                # Update Info.plist
-                /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" "$INFO_PLIST_PATH"
-                
-                # Verify
-                UPDATED_BUILD=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$INFO_PLIST_PATH")
-                if [ "$UPDATED_BUILD" = "$NEW_BUILD" ]; then
-                  log_success "Version updated to: $NEW_BUILD"
-                else
-                  log_error "Update failed"
-                  exit 1
-                fi
-                
-                # Set pipeline variables
-                echo "##vso[task.setvariable variable=newBundleVersion;isOutput=true]$NEW_BUILD"
-                echo "##vso[task.setvariable variable=currentAppVersion;isOutput=true]$CURRENT_VERSION"
-                echo "##vso[task.setvariable variable=infoPlistPath;isOutput=true]$INFO_PLIST_PATH"
-                EOF
-                
-                chmod +x scripts/increment-version.sh
-                ./scripts/increment-version.sh
+                echo "✅ Found IPA: $IPA_FILE"
+                echo "##vso[task.setvariable variable=ipaPath]$IPA_FILE"
 
-          - task: Bash@3
-            displayName: 'Commit Version Changes'
+          - task: AppStoreRelease@1
+            displayName: 'Upload to TestFlight'
             inputs:
-              targetType: 'inline'
-              script: |
-                #!/bin/bash
-                set -e
+              serviceEndpoint: 'AppStore-BusinessCard-TestFlight'
+              applicationIdentifier: 'com.gleidsonlm.businesscard'
+              appType: 'iOS'
+              ipaPath: '$(ipaPath)'
+              releaseTrack: 'TestFlight'
+              releaseNotes: |
+                Business Card App - Manual Build
                 
-                git config user.email "azure-pipeline@gleidsonlm.com"
-                git config user.name "Azure Pipeline"
+                Built locally with Xcode
+                Version managed manually for quality control
                 
-                if ! git diff --quiet **/*.plist; then
-                  NEW_BUILD="${VERSIONUPDATE_NEWBUNDLEVERSION:-unknown}"
-                  APP_VERSION="${VERSIONUPDATE_CURRENTAPPVERSION:-unknown}"
-                  
-                  git add **/*.plist
-                  git commit -m "chore(version): Auto-increment bundle version to $NEW_BUILD"
-                  git push origin $(Build.SourceBranchName)
-                  echo "✅ Version changes committed"
-                else
-                  echo "ℹ️ No version changes to commit"
-                fi
-
-  # STAGE 2: Deploy to TestFlight - NO ARTIFACT DEPENDENCIES
-  - stage: DeployTestFlight
-    displayName: 'Deploy to TestFlight'
-    dependsOn: VersionManagement
-    condition: succeeded()
-    variables:
-      newBundleVersion: $[ stageDependencies.VersionManagement.IncrementVersion.outputs['versionUpdate.newBundleVersion'] ]
-      currentAppVersion: $[ stageDependencies.VersionManagement.IncrementVersion.outputs['versionUpdate.currentAppVersion'] ]
-      infoPlistPath: $[ stageDependencies.VersionManagement.IncrementVersion.outputs['versionUpdate.infoPlistPath'] ]
-    jobs:
-      - deployment: TestFlightUpload
-        displayName: 'Upload to TestFlight'
-        environment: 'TestFlight-Production'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                # FRESH CHECKOUT - No artifact downloads
-                - checkout: self
-                  displayName: 'Fresh Checkout (Latest Version)'
-
-                - task: Bash@3
-                  displayName: 'Build Information Summary'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      echo "=== TestFlight Deploy Information ==="
-                      echo "📱 App: $(appName)"
-                      echo "🆔 Bundle ID: $(bundleId)"
-                      echo "📊 App Version: $(currentAppVersion)"
-                      echo "🏗️ Bundle Version: $(newBundleVersion)"
-                      echo "📁 Info.plist: $(infoPlistPath)"
-                      echo "🌿 Branch: $(Build.SourceBranchName)"
-                      echo "🔢 Build: $(Build.BuildNumber)"
-
-                - task: Bash@3
-                  displayName: 'Discover and Validate IPA'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      #!/bin/bash
-                      set -e
-                      
-                      echo "=== IPA Discovery ==="
-                      
-                      # Search for IPA files
-                      IPA_FILE=""
-                      for pattern in "build/*.ipa" "*/build/*.ipa" "**/*.ipa"; do
-                        found=$(find . -path "./$pattern" -type f 2>/dev/null | head -1)
-                        if [ -n "$found" ]; then
-                          IPA_FILE="$found"
-                          break
-                        fi
-                      done
-                      
-                      if [ -z "$IPA_FILE" ]; then
-                        echo "❌ No IPA file found"
-                        echo "Available files:"
-                        find . -name "*.ipa" -o -name "*.app" -o -name "*.xcarchive" | head -10
-                        echo ""
-                        echo "📋 Required Actions:"
-                        echo "1. Build app in Xcode (Product → Archive)"
-                        echo "2. Export IPA to build/ folder"
-                        echo "3. Commit: git add build/ && git commit -m 'feat: Add IPA'"
-                        echo "4. Re-run pipeline"
-                        exit 1
-                      fi
-                      
-                      echo "✅ Found IPA: $IPA_FILE"
-                      echo "📦 Size: $(du -h "$IPA_FILE" | cut -f1)"
-                      
-                      # Copy to standard location
-                      mkdir -p "$(Agent.TempDirectory)/ipa"
-                      cp "$IPA_FILE" "$(Agent.TempDirectory)/ipa/app.ipa"
-                      echo "##vso[task.setvariable variable=ipaPath]$(Agent.TempDirectory)/ipa/app.ipa"
-
-                - task: AppStoreRelease@1
-                  displayName: 'Upload to TestFlight'
-                  inputs:
-                    serviceEndpoint: 'AppStore-BusinessCard-TestFlight'
-                    applicationIdentifier: '$(bundleId)'
-                    appType: 'iOS'
-                    ipaPath: '$(ipaPath)'
-                    releaseTrack: 'TestFlight'
-                    releaseNotes: |
-                      🚀 Business Card App - Build $(newBundleVersion)
-                      
-                      📅 Build Date: $(Build.BuildNumber)
-                      📊 App Version: $(currentAppVersion)
-                      🏗️ Bundle Version: $(newBundleVersion)
-                      
-                      ✨ Features:
-                      • Create and share business cards as vCard
-                      • Generate QR codes for contact sharing
-                      • Enhanced security with Appdome
-                      
-                      🧪 Please test and provide feedback via TestFlight
-                    shouldSkipWaitingForProcessing: false
-                    shouldSkipSubmission: false
-                    shouldInstallFastlane: true
-                    fastlaneVersionChoice: 'LatestVersion'
-
-                - task: Bash@3
-                  displayName: 'Success Summary'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      echo "🎉 TestFlight Upload Successful!"
-                      echo "📱 $(appName) v$(currentAppVersion) ($(newBundleVersion))"
-                      echo "🔗 Check App Store Connect for processing status"
+                Please test and provide feedback via TestFlight
