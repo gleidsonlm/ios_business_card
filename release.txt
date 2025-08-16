@@ -1,0 +1,4 @@
+1. Launch the App.
+2. Touch the top right “plus” icon to add an item.
+3. Swipe the created item to delete.
+4. Touch the top right "warning" icon to Appdome screen.
