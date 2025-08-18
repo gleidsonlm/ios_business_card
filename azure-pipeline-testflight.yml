@@ -32,7 +32,7 @@ stages:
               releaseTrack: "TestFlight"
               appType: "iOS"
               ipaPath: "./BusinessCard.ipa"
-              appSpecificId: "$appSpecificId"
+              appSpecificId: "$(appSpecificId)"
               releaseNotes: "./release.txt"
               distributedToExternalTesters: true
               externalTestersGroups: "Appdome"
