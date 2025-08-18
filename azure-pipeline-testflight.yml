@@ -342,7 +342,7 @@ stages:
               # Release Notes and Distribution
               releaseNotes: "./release_notes.txt"   # Enhanced with fix details
               distributedToExternalTesters: true
-              externalTestersGroups: "Appdome"
+              externalTestersGroups: "AppdomeExternal"
               
               # Processing Options
               shouldSkipWaitingForProcessing: false  # Wait for Apple processing
