@@ -43,105 +43,97 @@ stages:
           - checkout: self
             displayName: 'Checkout Repository'
 
+          # Updated validation task with correct API Key ID format
           - task: Bash@3
-            displayName: 'API Key Configuration Validation'
+            displayName: 'API Key Configuration Validation - Corrected Format'
             inputs:
               targetType: 'inline'
               script: |
                 #!/bin/bash
                 set -e
                 
-                echo "=== App Store Connect API Key Validation ==="
-                echo "Date: 2025-08-18 15:11:06"
+                echo "=== Corrected API Key Format Validation ==="
+                echo "Date: 2025-08-18 17:47:23"
                 echo "User: gleidsonlm"
-                echo "Environment: ${{ parameters.deploymentEnvironment }}"
-                echo "Purpose: Resolve authentication failure from previous deployment"
+                echo "Reference: Official Apple Developer Documentation"
                 echo ""
                 
-                # Validate required variables are set
-                if [ -z "$(myApiKeyId)" ]; then
-                    echo "❌ ERROR: myApiKeyId variable not set"
-                    exit 1
-                fi
-                
-                if [ -z "$(myApiKeyIssuerId)" ]; then
-                    echo "❌ ERROR: myApiKeyIssuerId variable not set"
-                    exit 1
-                fi
-                
-                if [ -z "$(myApitoken)" ]; then
-                    echo "❌ ERROR: myApitoken variable not set"
-                    exit 1
-                fi
-                
-                if [ -z "$(myAppSpecificId)" ]; then
-                    echo "❌ ERROR: myAppSpecificId variable not set"
-                    exit 1
-                fi
-                
-                echo "✅ All required API key variables are configured"
-                echo ""
-                
-                # Validate variable formats (without exposing secrets)
+                # Get API key variables
                 API_KEY_ID="$(myApiKeyId)"
                 API_KEY_ISSUER_ID="$(myApiKeyIssuerId)"
                 API_TOKEN="$(myApitoken)"
                 APP_SPECIFIC_ID="$(myAppSpecificId)"
                 
-                echo "🔍 API Key Format Validation:"
-                echo "   Key ID: $API_KEY_ID (length: ${#API_KEY_ID})"
+                echo "🔍 Validating against official Apple specifications..."
+                echo ""
                 
-                # Validate Key ID format (8 characters, alphanumeric)
-                if [[ ${#API_KEY_ID} -eq 8 ]] && [[ "$API_KEY_ID" =~ ^[A-Za-z0-9]+$ ]]; then
-                    echo "   ✅ Key ID format valid"
+                # Validate Key ID format (CORRECTED: 10 characters, not 8)
+                echo "Key ID Validation:"
+                echo "   Value: $API_KEY_ID"
+                echo "   Length: ${#API_KEY_ID} characters"
+                
+                if [[ ${#API_KEY_ID} -eq 10 ]] && [[ "$API_KEY_ID" =~ ^[A-Z0-9]{10}$ ]]; then
+                    echo "   ✅ Format valid (10 characters, uppercase alphanumeric)"
                 else
-                    echo "   ❌ Key ID format invalid (expected: 8 alphanumeric characters)"
+                    echo "   ❌ Format invalid"
+                    echo "   Expected: 10 characters, uppercase letters and digits only"
+                    echo "   Pattern: ^[A-Z0-9]{10}$"
+                    echo "   Examples: 2X9R4HXF34, D383SF739, L5U8RELVLS"
                     exit 1
                 fi
                 
-                echo "   Issuer ID: $API_KEY_ISSUER_ID"
+                # Validate Issuer ID format (unchanged)
+                echo ""
+                echo "Issuer ID Validation:"
+                echo "   Value: $API_KEY_ISSUER_ID"
+                echo "   Length: ${#API_KEY_ISSUER_ID} characters"
                 
-                # Validate Issuer ID format (UUID)
                 if [[ "$API_KEY_ISSUER_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
-                    echo "   ✅ Issuer ID format valid"
+                    echo "   ✅ Format valid (UUID format)"
                 else
-                    echo "   ❌ Issuer ID format invalid (expected: UUID format)"
+                    echo "   ❌ Format invalid"
+                    echo "   Expected: UUID format (8-4-4-4-12 character groups)"
+                    echo "   Example: 69a6de80-cfbd-47ef-9fba-8891c78f413e"
                     exit 1
                 fi
                 
-                echo "   API Token: [REDACTED] (length: ${#API_TOKEN})"
+                # Validate API token format (unchanged)
+                echo ""
+                echo "API Token Validation:"
+                echo "   Length: ${#API_TOKEN} characters"
                 
-                # Validate API token format (base64, reasonable length)
                 if [[ ${#API_TOKEN} -ge 200 ]] && [[ ${#API_TOKEN} -le 600 ]]; then
-                    echo "   ✅ API Token length reasonable"
+                    echo "   ✅ Length reasonable (200-600 characters expected)"
                 else
-                    echo "   ❌ API Token length unexpected (expected: 200-600 characters)"
-                    echo "   💡 Ensure you're using base64-encoded .p8 content"
+                    echo "   ❌ Length unexpected"
+                    echo "   Expected: 200-600 characters (base64-encoded .p8 content)"
                     exit 1
                 fi
                 
                 # Validate base64 format
                 if echo "$API_TOKEN" | base64 -d > /dev/null 2>&1; then
-                    echo "   ✅ API Token appears to be valid base64"
+                    echo "   ✅ Valid base64 format"
                 else
-                    echo "   ❌ API Token is not valid base64"
-                    echo "   💡 Re-encode your .p8 file: base64 -i AuthKey_$API_KEY_ID.p8"
+                    echo "   ❌ Invalid base64 format"
+                    echo "   💡 Re-encode: base64 -i AuthKey_$API_KEY_ID.p8"
                     exit 1
                 fi
                 
-                echo "   App Specific ID: $APP_SPECIFIC_ID"
+                # Validate App Specific ID (unchanged)
+                echo ""
+                echo "App Specific ID Validation:"
+                echo "   Value: $APP_SPECIFIC_ID"
                 
-                # Validate App Specific ID (numeric)
                 if [[ "$APP_SPECIFIC_ID" =~ ^[0-9]+$ ]]; then
-                    echo "   ✅ App Specific ID format valid"
+                    echo "   ✅ Format valid (numeric)"
                 else
-                    echo "   ❌ App Specific ID format invalid (expected: numeric)"
+                    echo "   ❌ Format invalid (expected numeric)"
                     exit 1
                 fi
                 
                 echo ""
-                echo "✅ API Key configuration validation passed"
-                echo "🔄 Proceeding to TestFlight deployment..."
+                echo "✅ All API key components validated against official Apple specifications"
+                echo "🔄 Proceeding with TestFlight deployment..."
 
   - stage: TestFlightDeployment
     displayName: 'TestFlight Deployment with Enhanced Authentication'
