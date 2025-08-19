@@ -64,3 +64,4 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 private_keys
+.DS_Store

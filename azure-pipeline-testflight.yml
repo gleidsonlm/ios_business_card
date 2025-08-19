@@ -14,24 +14,10 @@ trigger:
 pr: none
 
 pool:
-  vmImage: 'macOS-13'
+  vmImage: 'macos-latest'
 
 variables:
-  - name: bundleId
-    value: 'com.gleidsonlm.businesscard'
-  - name: appName
-    value: 'Business Card'
-  - name: ipaFileName
-    value: 'BusinessCard.ipa'
-
-parameters:
-  - name: deploymentEnvironment
-    displayName: 'Deployment Environment'
-    type: string
-    default: 'UAT'
-    values:
-      - 'UAT'
-      - 'PRODUCTION'
+- group: iOS-Signing-Assets
 
 stages:
   - stage: AuthenticationValidation
@@ -134,6 +120,68 @@ stages:
                 echo ""
                 echo "✅ All API key components validated against official Apple specifications"
                 echo "🔄 Proceeding with TestFlight deployment..."
+
+  - stage: PrepareBuildEnvironment
+    displayName: 'Prepare Build Environment'
+    jobs:
+      - job: PrepareBuild
+        displayName: 'Prepare Build Environment'
+        inputs:
+          targetType: 'inline'
+        script: |
+          latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
+          if [ -n "$latest_xcode" ]; then
+            sudo xcode-select -s "/Applications/$latest_xcode"
+          fi
+          xcodebuild -version
+
+  - stage: Build
+    jobs:
+    - job: BuildiOS
+      steps:
+      # Download secure files
+      - task: DownloadSecureFile@1
+        name: certificate
+        inputs:
+          secureFile: 'distribution-certificate.p12'
+      
+      - task: DownloadSecureFile@1
+        name: provisioningProfile
+        inputs:
+          secureFile: 'distribution-profile.mobileprovision'
+      
+      - task: DownloadSecureFile@1
+        name: appStoreKey
+        inputs:
+          secureFile: 'AuthKey_$(APP_STORE_CONNECT_KEY_ID).p8'
+      
+      # Install certificate and provisioning profile
+      - task: InstallAppleCertificate@2
+        inputs:
+          certSecureFile: 'distribution-certificate.p12'
+          certPwd: '$(APPLE_CERTIFICATE_PASSWORD)'
+          keychain: 'temp'
+      
+      - task: InstallAppleProvisioningProfile@1
+        inputs:
+          provisioningProfileLocation: 'secureFiles'
+          provProfileSecureFile: 'distribution-profile.mobileprovision'
+      
+      # Build and sign
+      - task: Xcode@5
+        inputs:
+          actions: 'archive'
+          scheme: 'businesscard'
+          sdk: 'iphoneos'
+          configuration: 'Release'
+          xcWorkspacePath: 'businesscard'
+          archivePath: '$(Agent.BuildDirectory)/businesscard.xcarchive'
+          exportPath: '$(Agent.BuildDirectory)'
+          exportOptions: 'plist'
+          exportOptionsPlist: 'ExportOptions.plist'
+          signingOption: 'manual'
+          signingIdentity: 'Apple Distribution'
+          provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
 
   - stage: TestFlightDeployment
     displayName: 'TestFlight Deployment with Enhanced Authentication'
@@ -327,9 +375,9 @@ stages:
             inputs:
               # API Key Authentication (verified and corrected)
               authType: "ApiKey"
-              apiKeyId: "$(myApiKeyId)"              # New API key with TestFlight permissions
-              apiKeyIssuerId: "$(myApiKeyIssuerId)"  # Verified Issuer ID
-              apitoken: "$(myApitoken)"              # Properly base64-encoded .p8 content
+              apiKeyId: "$(APP_STORE_CONNECT_KEY_ID)"              # New API key with TestFlight permissions
+              apiKeyIssuerId: "$(APP_STORE_CONNECT_ISSUER_ID)"  # Verified Issuer ID
+              apitoken: "$(APP_STORE_CONNECT_KEY_ID_BASE64)"              # Properly base64-encoded .p8 content
               
               # Release Configuration
               releaseTrack: "TestFlight"
@@ -337,7 +385,7 @@ stages:
               
               # Binary and App Configuration
               ipaPath: "./$(ipaFileName)"            # Validated IPA file
-              appSpecificId: "$(myAppSpecificId)"    # App Store Connect App ID: 6751057358
+              appSpecificId: "$(APP_STORE_APPLE_ID)"    # App Store Connect App ID: 6751057358
               
               # Release Notes and Distribution
               releaseNotes: "./release_notes.txt"   # Enhanced with fix details
