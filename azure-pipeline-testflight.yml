@@ -17,7 +17,22 @@ pool:
   vmImage: 'macos-latest'
 
 variables:
-- group: iOS-Signing-Assets
+  - group: iOS-Signing-Assets
+  - name: bundleId
+    value: 'com.gleidsonlm.businesscard'
+  - name: appName
+    value: 'Business Card'
+  - name: ipaFileName
+    value: 'BusinessCard.ipa'
+
+parameters:
+  - name: deploymentEnvironment
+    displayName: 'Deployment Environment'
+    type: string
+    default: 'UAT'
+    values:
+      - 'UAT'
+      - 'PRODUCTION'
 
 stages:
   - stage: AuthenticationValidation
@@ -126,14 +141,16 @@ stages:
     jobs:
       - job: PrepareBuild
         displayName: 'Prepare Build Environment'
-        inputs:
-          targetType: 'inline'
-        script: |
-          latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
-          if [ -n "$latest_xcode" ]; then
-            sudo xcode-select -s "/Applications/$latest_xcode"
-          fi
-          xcodebuild -version
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                latest_xcode=$(ls /Applications | grep 'Xcode' | sort -Vr | head -n 1)
+                if [ -n "$latest_xcode" ]; then
+                  sudo xcode-select -s "/Applications/$latest_xcode"
+                fi
+                xcodebuild -version
 
   - stage: Build
     jobs:
