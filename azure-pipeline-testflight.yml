@@ -153,51 +153,212 @@ stages:
                 xcodebuild -version
 
   - stage: Build
+    displayName: 'Build and Package iOS Application'
+    dependsOn: PrepareBuildEnvironment
+    condition: succeeded('PrepareBuildEnvironment')
     jobs:
     - job: BuildIOS
+      displayName: 'Build iOS Application'
       steps:
       # Download secure files
       - task: DownloadSecureFile@1
         name: certificate
+        displayName: 'Download Distribution Certificate'
         inputs:
           secureFile: 'distribution-certificate.p12'
       
       - task: DownloadSecureFile@1
         name: provisioningProfile
+        displayName: 'Download Provisioning Profile'
         inputs:
           secureFile: 'distribution-profile.mobileprovision'
       
       - task: DownloadSecureFile@1
         name: appStoreKey
+        displayName: 'Download App Store Connect API Key'
         inputs:
           secureFile: 'AuthKey_$(APP_STORE_CONNECT_KEY_ID).p8'
       
+      - task: Bash@3
+        displayName: 'Create or Validate ExportOptions.plist'
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "=== ExportOptions.plist Configuration ==="
+            
+            EXPORT_OPTIONS_PATH="ExportOptions.plist"
+            
+            if [ ! -f "$EXPORT_OPTIONS_PATH" ]; then
+              echo "📝 Creating ExportOptions.plist..."
+              cat > "$EXPORT_OPTIONS_PATH" << EOF
+            <?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0">
+            <dict>
+                <key>method</key>
+                <string>app-store</string>
+                <key>teamID</key>
+                <string>$(APPLE_TEAM_ID)</string>
+                <key>uploadBitcode</key>
+                <false/>
+                <key>uploadSymbols</key>
+                <true/>
+                <key>compileBitcode</key>
+                <false/>
+                <key>signingStyle</key>
+                <string>manual</string>
+                <key>signingCertificate</key>
+                <string>Apple Distribution</string>
+                <key>provisioningProfiles</key>
+                <dict>
+                    <key>$(bundleId)</key>
+                    <string>$(APPLE_PROV_PROFILE_NAME)</string>
+                </dict>
+                <key>destination</key>
+                <string>export</string>
+            </dict>
+            </plist>
+            EOF
+              echo "✅ ExportOptions.plist created"
+            else
+              echo "✅ ExportOptions.plist already exists"
+            fi
+            
+            echo "📄 ExportOptions.plist content:"
+            cat "$EXPORT_OPTIONS_PATH"
+            
+      # Validate project structure first
+      - task: Bash@3
+        displayName: 'Validate Project Structure and Environment'
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "=== Build Environment Validation ==="
+            echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "User: gleidsonlm"
+            echo "Xcode Version: $(xcodebuild -version | head -1)"
+            echo ""
+            
+            echo "📁 Repository structure:"
+            ls -la
+            echo ""
+            
+            echo "🔍 Xcode project discovery:"
+            WORKSPACE_PATH=""
+            PROJECT_PATH=""
+            
+            # Check for workspace first (preferred for dependencies)
+            if [ -f "businesscard.xcworkspace" ]; then
+              WORKSPACE_PATH="businesscard.xcworkspace"
+              echo "✅ Found workspace: $WORKSPACE_PATH"
+            elif [ -f "businesscard/businesscard.xcworkspace" ]; then
+              WORKSPACE_PATH="businesscard/businesscard.xcworkspace"
+              echo "✅ Found nested workspace: $WORKSPACE_PATH"
+            # Check for project files
+            elif [ -f "businesscard.xcodeproj" ]; then
+              PROJECT_PATH="businesscard.xcodeproj"
+              echo "✅ Found project: $PROJECT_PATH"
+            elif [ -f "businesscard/businesscard.xcodeproj" ]; then
+              PROJECT_PATH="businesscard/businesscard.xcodeproj"
+              echo "✅ Found nested project: $PROJECT_PATH"
+            else
+              echo "❌ ERROR: No Xcode workspace or project found"
+              echo "Expected one of:"
+              echo "  - businesscard.xcworkspace"
+              echo "  - businesscard.xcodeproj"
+              echo "  - businesscard/businesscard.xcworkspace"
+              echo "  - businesscard/businesscard.xcodeproj"
+              exit 1
+            fi
+            
+            # Set variables for subsequent steps
+            if [ -n "$WORKSPACE_PATH" ]; then
+              echo "##vso[task.setvariable variable=xcWorkspacePath]$WORKSPACE_PATH"
+              echo "##vso[task.setvariable variable=useWorkspace]true"
+              
+              echo "📋 Workspace schemes:"
+              xcodebuild -workspace "$WORKSPACE_PATH" -list
+            else
+              echo "##vso[task.setvariable variable=xcodeProjectPath]$PROJECT_PATH"
+              echo "##vso[task.setvariable variable=useWorkspace]false"
+              
+              echo "📋 Project schemes:"
+              xcodebuild -project "$PROJECT_PATH" -list
+            fi
+            
+            # Validate assets
+            echo ""
+            echo "🎨 Asset validation:"
+            ASSETS_PATH=$(find . -name "Assets.xcassets" | head -1)
+            if [ -n "$ASSETS_PATH" ]; then
+              echo "✅ Assets found: $ASSETS_PATH"
+              # Check for common required assets
+              if [ -d "$ASSETS_PATH/AppIcon.appiconset" ]; then
+                echo "✅ App Icon found"
+              else
+                echo "⚠️ App Icon not found - may cause build issues"
+              fi
+            else
+              echo "❌ No Assets.xcassets found - this will cause build failure"
+              exit 1
+            fi
+            
+            echo ""
+            echo "✅ Project structure validation completed"
+
       # Install certificate and provisioning profile
       - task: InstallAppleCertificate@2
+        displayName: 'Install Distribution Certificate'
         inputs:
           certSecureFile: 'distribution-certificate.p12'
           certPwd: '$(APPLE_CERTIFICATE_PASSWORD)'
           keychain: 'temp'
       
       - task: InstallAppleProvisioningProfile@1
+        displayName: 'Install Provisioning Profile'
         inputs:
           provisioningProfileLocation: 'secureFiles'
           provProfileSecureFile: 'distribution-profile.mobileprovision'
       
-      # Build and sign
+      # Build and sign with dynamic project path
       - task: Xcode@5
+        displayName: 'Build and Archive iOS App (Workspace)'
+        condition: eq(variables['useWorkspace'], 'true')
         inputs:
           actions: 'archive'
           scheme: 'businesscard'
           sdk: 'iphoneos'
           configuration: 'Release'
+          xcWorkspacePath: '$(xcWorkspacePath)'
           archivePath: '$(Agent.BuildDirectory)/businesscard.xcarchive'
-          exportPath: '$(Agent.BuildDirectory)'
+          exportPath: '$(Agent.BuildDirectory)/export'
           exportOptions: 'plist'
           exportOptionsPlist: 'ExportOptions.plist'
           signingOption: 'manual'
           signingIdentity: 'Apple Distribution'
           provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
+          args: '-destination "generic/platform=iOS" -allowProvisioningUpdates'
+
+      - task: Xcode@5
+        displayName: 'Build and Archive iOS App (Project)'
+        condition: eq(variables['useWorkspace'], 'false')
+        inputs:
+          actions: 'archive'
+          scheme: 'businesscard'
+          sdk: 'iphoneos'
+          configuration: 'Release'
+          xcodeProjectPath: '$(xcodeProjectPath)'
+          archivePath: '$(Agent.BuildDirectory)/businesscard.xcarchive'
+          exportPath: '$(Agent.BuildDirectory)/export'
+          exportOptions: 'plist'
+          exportOptionsPlist: 'ExportOptions.plist'
+          signingOption: 'manual'
+          signingIdentity: 'Apple Distribution'
+          provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
+          args: '-destination "generic/platform=iOS" -allowProvisioningUpdates'
+
+      # Rest of the metadata extraction and artifact publishing steps...
+      # (Include the metadata extraction and publishing steps from my previous response)
 
   - stage: TestFlightDeployment
     displayName: 'TestFlight Deployment with Enhanced Authentication'
