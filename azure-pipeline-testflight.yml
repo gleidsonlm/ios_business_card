@@ -243,31 +243,69 @@ stages:
             ls -la
             echo ""
             
-            echo "🔍 Xcode project discovery:"
+            echo "📁 Contents of businesscard directory:"
+            ls -la businesscard/
+            echo ""
+            
+            echo "🔍 Comprehensive Xcode project discovery:"
             WORKSPACE_PATH=""
             PROJECT_PATH=""
             
-            # Check for workspace first (preferred for dependencies)
-            if [ -f "businesscard.xcworkspace" ]; then
-              WORKSPACE_PATH="businesscard.xcworkspace"
-              echo "✅ Found workspace: $WORKSPACE_PATH"
-            elif [ -f "businesscard/businesscard.xcworkspace" ]; then
+            # Search for all possible Xcode project structures
+            echo "Searching for workspace files..."
+            find . -name "*.xcworkspace" -type d | while read workspace; do
+              echo "  Found workspace: $workspace"
+            done
+            
+            echo "Searching for project files..."
+            find . -name "*.xcodeproj" -type d | while read project; do
+              echo "  Found project: $project"
+            done
+            
+            # Updated discovery logic based on actual structure
+            if [ -f "businesscard/businesscard.xcworkspace/contents.xcworkspacedata" ]; then
               WORKSPACE_PATH="businesscard/businesscard.xcworkspace"
               echo "✅ Found nested workspace: $WORKSPACE_PATH"
-            # Check for project files
-            elif [ -f "businesscard.xcodeproj" ]; then
-              PROJECT_PATH="businesscard.xcodeproj"
-              echo "✅ Found project: $PROJECT_PATH"
-            elif [ -f "businesscard/businesscard.xcodeproj" ]; then
+            elif [ -f "businesscard.xcworkspace/contents.xcworkspacedata" ]; then
+              WORKSPACE_PATH="businesscard.xcworkspace"
+              echo "✅ Found workspace: $WORKSPACE_PATH"
+            elif [ -f "businesscard/businesscard.xcodeproj/project.pbxproj" ]; then
               PROJECT_PATH="businesscard/businesscard.xcodeproj"
               echo "✅ Found nested project: $PROJECT_PATH"
+            elif [ -f "businesscard.xcodeproj/project.pbxproj" ]; then
+              PROJECT_PATH="businesscard.xcodeproj"
+              echo "✅ Found project: $PROJECT_PATH"
+            elif [ -d "businesscard" ]; then
+              # Let's explore what's actually in the businesscard directory
+              echo "🔍 Exploring businesscard directory structure:"
+              find businesscard -name "*.xcodeproj" -o -name "*.xcworkspace" | head -5
+              
+              # Try to find any project file in businesscard directory
+              NESTED_PROJECT=$(find businesscard -name "*.xcodeproj" | head -1)
+              NESTED_WORKSPACE=$(find businesscard -name "*.xcworkspace" | head -1)
+              
+              if [ -n "$NESTED_WORKSPACE" ]; then
+                WORKSPACE_PATH="$NESTED_WORKSPACE"
+                echo "✅ Found workspace in subdirectory: $WORKSPACE_PATH"
+              elif [ -n "$NESTED_PROJECT" ]; then
+                PROJECT_PATH="$NESTED_PROJECT"
+                echo "✅ Found project in subdirectory: $PROJECT_PATH"
+              else
+                echo "❌ ERROR: No Xcode workspace or project found in any expected location"
+                echo ""
+                echo "📋 Debug Information:"
+                echo "Contents of current directory:"
+                ls -la
+                echo ""
+                echo "Contents of businesscard directory:"
+                ls -la businesscard/ 2>/dev/null || echo "businesscard directory not accessible"
+                echo ""
+                echo "All .xcodeproj and .xcworkspace files in repository:"
+                find . -name "*.xcodeproj" -o -name "*.xcworkspace" | head -10
+                exit 1
+              fi
             else
-              echo "❌ ERROR: No Xcode workspace or project found"
-              echo "Expected one of:"
-              echo "  - businesscard.xcworkspace"
-              echo "  - businesscard.xcodeproj"
-              echo "  - businesscard/businesscard.xcworkspace"
-              echo "  - businesscard/businesscard.xcodeproj"
+              echo "❌ ERROR: No businesscard directory found"
               exit 1
             fi
             
@@ -276,17 +314,19 @@ stages:
               echo "##vso[task.setvariable variable=xcWorkspacePath]$WORKSPACE_PATH"
               echo "##vso[task.setvariable variable=useWorkspace]true"
               
-              echo "📋 Workspace schemes:"
-              xcodebuild -workspace "$WORKSPACE_PATH" -list
+              echo ""
+              echo "📋 Workspace schemes and targets:"
+              xcodebuild -workspace "$WORKSPACE_PATH" -list || echo "Failed to list workspace contents"
             else
               echo "##vso[task.setvariable variable=xcodeProjectPath]$PROJECT_PATH"
               echo "##vso[task.setvariable variable=useWorkspace]false"
               
-              echo "📋 Project schemes:"
-              xcodebuild -project "$PROJECT_PATH" -list
+              echo ""
+              echo "📋 Project schemes and targets:"
+              xcodebuild -project "$PROJECT_PATH" -list || echo "Failed to list project contents"
             fi
             
-            # Validate assets
+            # Validate assets - look in the actual project directory
             echo ""
             echo "🎨 Asset validation:"
             ASSETS_PATH=$(find . -name "Assets.xcassets" | head -1)
@@ -296,16 +336,30 @@ stages:
               if [ -d "$ASSETS_PATH/AppIcon.appiconset" ]; then
                 echo "✅ App Icon found"
               else
-                echo "⚠️ App Icon not found - may cause build issues"
+                echo "⚠️ App Icon not found in $ASSETS_PATH - checking contents:"
+                ls -la "$ASSETS_PATH" | head -10
               fi
             else
-              echo "❌ No Assets.xcassets found - this will cause build failure"
-              exit 1
+              echo "⚠️ No Assets.xcassets found - searching for image assets:"
+              find . -name "*.imageset" -o -name "*.appiconset" | head -5
             fi
+            
+            # Check for Info.plist files
+            echo ""
+            echo "📋 Info.plist validation:"
+            find . -name "Info.plist" | while read plist; do
+              echo "  Found Info.plist: $plist"
+            done
             
             echo ""
             echo "✅ Project structure validation completed"
-
+            
+            # Clean up any existing IPA files to ensure fresh build
+            if [ -f "BusinessCard.ipa" ]; then
+              echo "🧹 Removing existing IPA file for fresh build"
+              rm -f BusinessCard.ipa
+            fi
+            
       # Install certificate and provisioning profile
       - task: InstallAppleCertificate@2
         displayName: 'Install Distribution Certificate'
@@ -357,9 +411,153 @@ stages:
           provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
           args: '-destination "generic/platform=iOS" -allowProvisioningUpdates'
 
-      # Rest of the metadata extraction and artifact publishing steps...
-      # (Include the metadata extraction and publishing steps from my previous response)
+      # Extract and validate build metadata
+      - task: Bash@3
+        displayName: 'Extract Build Metadata and Validate IPA'
+        inputs:
+          targetType: 'inline'
+          script: |
+            #!/bin/bash
+            set -e
+            
+            echo "=== Build Metadata Extraction ==="
+            echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "User: gleidsonlm"
+            echo "Build Number: $(Build.BuildNumber)"
+            echo ""
+            
+            # Locate the built IPA - check multiple possible locations
+            IPA_PATHS=(
+              "$(Agent.BuildDirectory)/export/businesscard.ipa"
+              "$(Agent.BuildDirectory)/export/BusinessCard.ipa"
+              "$(Agent.BuildDirectory)/businesscard.ipa"
+              "$(Agent.BuildDirectory)/BusinessCard.ipa"
+            )
+            
+            IPA_PATH=""
+            for path in "${IPA_PATHS[@]}"; do
+              if [ -f "$path" ]; then
+                IPA_PATH="$path"
+                echo "✅ IPA found: $IPA_PATH"
+                break
+              fi
+            done
+            
+            if [ -z "$IPA_PATH" ]; then
+              echo "❌ ERROR: IPA file not found at any expected location"
+              echo "Expected locations:"
+              printf '%s\n' "${IPA_PATHS[@]}" | sed 's/^/  /'
+              echo ""
+              echo "Contents of $(Agent.BuildDirectory):"
+              ls -la "$(Agent.BuildDirectory)/" || echo "Build directory not found"
+              echo ""
+              echo "Contents of $(Agent.BuildDirectory)/export:"
+              ls -la "$(Agent.BuildDirectory)/export/" || echo "Export directory not found"
+              exit 1
+            fi
+            
+            # Create export directory if it doesn't exist
+            mkdir -p "$(Agent.BuildDirectory)/export"
+            
+            # Copy IPA to standard location for artifact publishing
+            STANDARD_IPA_PATH="$(Agent.BuildDirectory)/export/businesscard.ipa"
+            if [ "$IPA_PATH" != "$STANDARD_IPA_PATH" ]; then
+              cp "$IPA_PATH" "$STANDARD_IPA_PATH"
+              echo "📋 IPA copied to standard location: $STANDARD_IPA_PATH"
+            fi
+            
+            # Extract app metadata from IPA
+            TEMP_DIR=$(mktemp -d)
+            unzip -q "$STANDARD_IPA_PATH" -d "$TEMP_DIR"
+            APP_PATH=$(find "$TEMP_DIR" -name "*.app" -type d | head -1)
+            
+            if [ -z "$APP_PATH" ]; then
+              echo "❌ ERROR: No .app bundle found in IPA"
+              rm -rf "$TEMP_DIR"
+              exit 1
+            fi
+            
+            # Extract metadata
+            BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP_PATH/Info.plist" 2>/dev/null || echo "unknown")
+            VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP_PATH/Info.plist" 2>/dev/null || echo "unknown")
+            BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" "$APP_PATH/Info.plist" 2>/dev/null || echo "unknown")
+            
+            echo "📱 App Metadata:"
+            echo "   Bundle ID: $BUNDLE_ID"
+            echo "   Version: $VERSION" 
+            echo "   Build Number: $BUILD_NUMBER"
+            
+            # Validate IPA integrity
+            IPA_SIZE=$(du -h "$STANDARD_IPA_PATH" | cut -f1)
+            echo "   IPA Size: $IPA_SIZE"
+            
+            if unzip -t "$STANDARD_IPA_PATH" > /dev/null 2>&1; then
+              echo "   ✅ IPA structure valid"
+            else
+              echo "   ❌ IPA structure invalid"
+              exit 1
+            fi
+            
+            # Create metadata file for artifact
+            cat > "$(Agent.BuildDirectory)/export/build-metadata.json" << EOF
+            {
+              "bundleId": "$BUNDLE_ID",
+              "version": "$VERSION",
+              "buildNumber": "$BUILD_NUMBER",
+              "buildId": "$(Build.BuildNumber)",
+              "buildDate": "$(date -u '+%Y-%m-%d %H:%M:%S UTC')",
+              "gitCommit": "$(Build.SourceVersion)",
+              "ipaSize": "$IPA_SIZE",
+              "scheme": "businesscard",
+              "configuration": "Release"
+            }
+            EOF
+            
+            # Set pipeline variables for downstream stages
+            echo "##vso[task.setvariable variable=appVersion;isOutput=true]$VERSION"
+            echo "##vso[task.setvariable variable=buildNumber;isOutput=true]$BUILD_NUMBER"
+            echo "##vso[task.setvariable variable=bundleIdentifier;isOutput=true]$BUNDLE_ID"
+            echo "##vso[task.setvariable variable=ipaPath;isOutput=true]$STANDARD_IPA_PATH"
+            
+            rm -rf "$TEMP_DIR"
+            
+            echo ""
+            echo "✅ Build metadata extracted and validated successfully"
+        name: extractMetadata
 
+      # Publish build artifacts
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish IPA and Build Artifacts'
+        inputs:
+          pathToPublish: '$(Agent.BuildDirectory)/export'
+          artifactName: 'ios-build-$(Build.BuildNumber)'
+          artifactType: 'Container'
+        condition: succeeded()
+
+      # Create build summary
+      - task: Bash@3
+        displayName: 'Create Build Summary'
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "🎉 Build Stage Completed Successfully"
+            echo ""
+            echo "📊 Build Summary:"
+            echo "   • Pipeline: $(Build.DefinitionName)"
+            echo "   • Build ID: $(Build.BuildNumber)"
+            echo "   • Source Branch: $(Build.SourceBranchName)"
+            echo "   • Commit: $(Build.SourceVersion)"
+            echo "   • App Version: $(extractMetadata.appVersion)"
+            echo "   • Build Number: $(extractMetadata.buildNumber)"
+            echo "   • Bundle ID: $(extractMetadata.bundleIdentifier)"
+            echo ""
+            echo "📦 Artifacts Published:"
+            echo "   • Artifact Name: ios-build-$(Build.BuildNumber)"
+            echo "   • IPA Location: businesscard.ipa"
+            echo "   • Metadata: build-metadata.json"
+            echo ""
+            echo "🔗 Next Stage: TestFlightDeployment will use these artifacts"
+        condition: succeeded()
   - stage: TestFlightDeployment
     displayName: 'TestFlight Deployment with Enhanced Authentication'
     dependsOn: 
