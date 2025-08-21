@@ -151,7 +151,64 @@ stages:
                   sudo xcode-select -s "/Applications/$latest_xcode"
                 fi
                 xcodebuild -version
-
+          - task: Bash@3
+            displayName: 'Configure iOS SDK and Build Settings'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "=== iOS SDK Configuration ==="
+                echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+                echo "User: gleidsonlm"
+                echo "Xcode Version: $(xcodebuild -version)"
+                echo ""
+                
+                echo "📱 Available iOS SDKs:"
+                xcodebuild -showsdks | grep iphoneos
+                echo ""
+                
+                # Get the latest available iOS SDK
+                LATEST_IOS_SDK=$(xcodebuild -showsdks | grep iphoneos | tail -1 | awk '{print $NF}')
+                echo "🎯 Latest available iOS SDK: $LATEST_IOS_SDK"
+                
+                # Extract iOS version from SDK
+                IOS_VERSION=$(echo "$LATEST_IOS_SDK" | sed 's/iphoneos//')
+                echo "📊 iOS Version: $IOS_VERSION"
+                
+                # Check if iOS 17.0 or later is available (prefer stable versions)
+                if xcodebuild -showsdks | grep -q "iphoneos17"; then
+                  TARGET_SDK="iphoneos17.0"
+                  TARGET_VERSION="17.0"
+                  echo "✅ Using iOS 17.0 SDK (stable)"
+                elif xcodebuild -showsdks | grep -q "iphoneos16"; then
+                  TARGET_SDK="iphoneos16.0"
+                  TARGET_VERSION="16.0"
+                  echo "✅ Using iOS 16.0 SDK (stable)"
+                else
+                  TARGET_SDK="$LATEST_IOS_SDK"
+                  TARGET_VERSION="$IOS_VERSION"
+                  echo "✅ Using latest available SDK: $TARGET_SDK"
+                fi
+                
+                # Set variables for build tasks
+                echo "##vso[task.setvariable variable=targetIOSSDK]$TARGET_SDK"
+                echo "##vso[task.setvariable variable=targetIOSVersion]$TARGET_VERSION"
+                
+                echo ""
+                echo "🔧 Build Configuration:"
+                echo "   Target SDK: $TARGET_SDK"
+                echo "   iOS Version: $TARGET_VERSION"
+                echo "   Deployment Target: Will be set to $TARGET_VERSION"
+                
+                # Validate available simulators and devices
+                echo ""
+                echo "📱 Available destinations:"
+                xcodebuild -showdestinations -scheme businesscard -workspace "$(xcWorkspacePath)" 2>/dev/null || \
+                xcodebuild -showdestinations -scheme businesscard -project "$(xcodeProjectPath)" 2>/dev/null || \
+                echo "⚠️ Could not enumerate destinations (will use generic/platform=iOS)"
+                
+                echo ""
+                echo "✅ iOS SDK configuration completed"
+                
   - stage: Build
     displayName: 'Build and Package iOS Application'
     dependsOn: PrepareBuildEnvironment
@@ -381,7 +438,7 @@ stages:
         inputs:
           actions: 'archive'
           scheme: 'businesscard'
-          sdk: 'iphoneos'
+          sdk: '$(targetIOSSDK)'
           configuration: 'Release'
           xcWorkspacePath: '$(xcWorkspacePath)'
           archivePath: '$(Agent.BuildDirectory)/businesscard.xcarchive'
@@ -391,7 +448,8 @@ stages:
           signingOption: 'manual'
           signingIdentity: 'Apple Distribution'
           provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
-          args: '-destination "generic/platform=iOS" -allowProvisioningUpdates'
+          args: 'IPHONEOS_DEPLOYMENT_TARGET=$(targetIOSVersion) -allowProvisioningUpdates'
+          useXcpretty: false
 
       - task: Xcode@5
         displayName: 'Build and Archive iOS App (Project)'
@@ -399,7 +457,7 @@ stages:
         inputs:
           actions: 'archive'
           scheme: 'businesscard'
-          sdk: 'iphoneos'
+          sdk: '$(targetIOSSDK)'
           configuration: 'Release'
           xcodeProjectPath: '$(xcodeProjectPath)'
           archivePath: '$(Agent.BuildDirectory)/businesscard.xcarchive'
@@ -409,7 +467,57 @@ stages:
           signingOption: 'manual'
           signingIdentity: 'Apple Distribution'
           provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
-          args: '-destination "generic/platform=iOS" -allowProvisioningUpdates'
+          args: 'IPHONEOS_DEPLOYMENT_TARGET=$(targetIOSVersion) -allowProvisioningUpdates'
+          useXcpretty: false
+
+      - task: Bash@3
+        displayName: 'Validate Build Output'
+        condition: always()
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "=== Build Output Validation ==="
+            echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo ""
+            
+            echo "📁 Build directory contents:"
+            ls -la "$(Agent.BuildDirectory)/" || echo "Build directory not found"
+            echo ""
+            
+            echo "📦 Archive validation:"
+            ARCHIVE_PATH="$(Agent.BuildDirectory)/businesscard.xcarchive"
+            if [ -d "$ARCHIVE_PATH" ]; then
+              echo "✅ Archive found: $ARCHIVE_PATH"
+              echo "📋 Archive contents:"
+              ls -la "$ARCHIVE_PATH/" | head -10
+              
+              # Check for app bundle in archive
+              APP_PATH="$ARCHIVE_PATH/Products/Applications"
+              if [ -d "$APP_PATH" ]; then
+                echo "✅ Applications folder found"
+                ls -la "$APP_PATH/"
+              else
+                echo "❌ Applications folder not found in archive"
+              fi
+            else
+              echo "❌ Archive not found at: $ARCHIVE_PATH"
+              echo ""
+              echo "🔍 Looking for archives in build directory:"
+              find "$(Agent.BuildDirectory)" -name "*.xcarchive" -type d | head -5
+            fi
+            
+            echo ""
+            echo "📤 Export directory validation:"
+            EXPORT_PATH="$(Agent.BuildDirectory)/export"
+            if [ -d "$EXPORT_PATH" ]; then
+              echo "✅ Export directory found: $EXPORT_PATH"
+              echo "📋 Export contents:"
+              ls -la "$EXPORT_PATH/" || echo "Cannot list export contents"
+            else
+              echo "❌ Export directory not found"
+              echo "Creating export directory for subsequent steps..."
+              mkdir -p "$EXPORT_PATH"
+            fi
 
       # Extract and validate build metadata
       - task: Bash@3
@@ -558,6 +666,7 @@ stages:
             echo ""
             echo "🔗 Next Stage: TestFlightDeployment will use these artifacts"
         condition: succeeded()
+
   - stage: TestFlightDeployment
     displayName: 'TestFlight Deployment with Enhanced Authentication'
     dependsOn: 
